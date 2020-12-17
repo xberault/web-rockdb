@@ -1,7 +1,7 @@
 import click
 from .app import app, db
 import yaml
-from .models import Artist, Album
+from .models import Artist, Album, Genre
 
 @app.cli.command()
 @click.argument('filename')
@@ -19,6 +19,17 @@ def loaddb(filename):
             o = Artist(name = ar)
             db.session.add(o)
             artists[ar] = o
+    db.session.commit()
+
+    #creation des genres
+    genres = {}
+    for al in albums:
+        for g in al["genre"]:
+            g = g.lower()
+            if g not in genres:
+                o = Genre(name = g)
+                db.session.add(o)
+                genres[g] = o
     db.session.commit()
 
     #creation des livres
