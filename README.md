@@ -22,4 +22,8 @@ On les installe avec **pip** dans le virtualenv.
 
 ## 3. Utilisation
 
-_À venir_
+Pour générer la base de données : `flask loaddb`
+
+Pour lancer l'application : `flask run`
+
+Pour plus d'informations : `flask` ou `flask --help`
