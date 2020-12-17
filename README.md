@@ -22,6 +22,8 @@ On les installe avec **pip** dans le virtualenv.
 
 ## 3. Utilisation
 
+Pour créer les tables de la base de données : `flask syncdb`
+
 Pour générer la base de données : `flask loaddb`
 
 Pour lancer l'application : `flask run`
