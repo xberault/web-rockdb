@@ -54,3 +54,12 @@ class Classification(db.Model):
 
 def get_sample():
     return Album.query.limit(10).all()
+
+def get_artist(id):
+    return Artist.query.get(id)
+
+def get_genre(id):
+    return Genre.query.get(id)
+
+def get_album(id):
+    return Album.query.get(id)
