@@ -13,12 +13,7 @@ On active le virtualenv :
 Ce projet, pour fonctionner a besoin de plusieurs librairies, dont **flask**.
 On les installe avec **pip** dans le virtualenv.
 
-- `pip install flask`
-- `pip install flask_bootstrap`
-- `pip install flask_sqlalchemy`
-- `pip install flask_login`
-- `pip install python-dotenv`
-- `pip install pyyaml`
+- `pip install -r requirements.txt`
 
 ## 3. Utilisation
 
