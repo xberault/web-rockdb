@@ -19,7 +19,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 db = SQLAlchemy(app)
 
-# app.config['SECRET_KEY'] = "23c6b4a9-c635-480e-9b12-2db0b0605fc8"
+app.config['SECRET_KEY'] = "23c6b4a9-c635-480e-9b12-2db0b0605fc8"
 
 # login_manager = LoginManager(app)
 # login_manager.login_view = "login"
