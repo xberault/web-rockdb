@@ -1,7 +1,7 @@
 import click
 from .app import app, db
 import yaml
-from .models import Artist, Album, Genre
+from .models import Artist, Album, Genre, Classification
 
 @app.cli.command()
 @click.argument('filename')
@@ -42,6 +42,16 @@ def loaddb(filename):
             artist_id = ar.id
         )
         db.session.add(o)
+    db.session.commit()
+
+    #creation des classifications (relation entre livres et genres)
+    for al in albums:
+        al_id = Album.query.filter_by(title=al["title"]).first().id
+        for g in al["genre"]:
+            g = g.lower()
+            g_id = Genre.query.filter_by(name=g).first().id
+            o = Classification(album_id = al_id, genre_id = g_id)
+            db.session.add(o)
     db.session.commit()
 
 @app.cli.command()
