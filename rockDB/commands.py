@@ -1,7 +1,8 @@
 import click
 from .app import app, db
 import yaml
-from .models import Artist, Album, Genre, Classification
+from hashlib import sha256
+from .models import Artist, Album, Genre, Classification, User
 
 @app.cli.command()
 @click.argument('filename')
@@ -58,3 +59,30 @@ def loaddb(filename):
 def syncdb():
     ''' Creates all missing tables '''
     db.create_all()
+
+@app.cli.command()
+@click.argument('username')
+@click.argument('password')
+def newuser(username, password):
+    ''' Creates a new user '''
+    m = sha256()
+    m.update(password.encode())
+    u = User(username=username, password=m.hexdigest())
+    db.session.add(u)
+    db.session.commit()
+
+@app.cli.command()
+@click.argument('username')
+@click.argument('password')
+def passwd(username, password):
+    ''' Changes password of an existing user '''
+    m = sha256()
+    m.update(password.encode())
+    u = User.query.get(username)
+    if u:
+        u.password = m.hexdigest()
+        db.session.commit()
+    else:
+        print("*"*50)
+        print("Il n'y a pas de compte associé au pseudo " + username)
+        print("*"*50)
