@@ -13,14 +13,16 @@ On active le virtualenv :
 Ce projet, pour fonctionner a besoin de plusieurs librairies, dont **flask**.
 On les installe avec **pip** dans le virtualenv.
 
-- `pip install -r requirements.txt`
+`pip install -r requirements.txt`
 
 ## 3. Utilisation
 
-Pour créer les tables de la base de données : `flask syncdb`
+Il existe plusieurs commandes :
 
-Pour générer la base de données : `flask loaddb`
+- `flask syncdb` pour créer les tables de la base de données
+- `flask loaddb <data.yml>` pour générer la base de données à l'aide d'un fichier yml
+- `flask run` pour lancer l'application
+- `flask newuser <username> <password>` pour créer un nouvel utilisateur
+- `flask passwd <username> <new_password>` pour modifier le mot de passe d'un utilisateur
 
-Pour lancer l'application : `flask run`
-
-Pour plus d'informations : `flask` ou `flask --help`
+Pour plus d'informations : `flask` ou `flask [nom_commande] --help`
