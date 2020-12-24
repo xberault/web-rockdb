@@ -1,12 +1,58 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block navbar %}
-<nav>
-<!-- TODO: -->
-</nav>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href=
+                {% if current_user.is_authenticated %}
+                    {{ url_for('dashboard') }}
+                {% else %}
+                    "/"
+                {% endif %}
+        >RockDB</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Accueil <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+            {% if current_user.is_authenticated %}
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        {{ current_user.username }}
+                    </button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" type="button">Profile</button>
+                        <div class="dropdown-divider"></div>
+                        <a class="btn dropdown-item" href="{{ url_for('logout') }}" title="Logout">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <a class="btn m-2" href="{{ url_for('login') }}" title="Sign In">Login</a>
+            {% endif %}
+        </div>
+    </nav>
 {% endblock %}
 {% block content %}
-<main role="main" class="container">
-{% block main %}{% endblock %}
-</main>
+
+    <main role="main" class="container">
+        {% include 'includes/messages.html' %}
+        {% block main %}{% endblock %}
+    </main>
 {% endblock %}
