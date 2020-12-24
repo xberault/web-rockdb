@@ -41,6 +41,26 @@ class Classification(db.Model):
         "Genre",
         backref = db.backref("classifications", lazy="dynamic"))
 
+class Playlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.username"))
+
+    user = db.relationship(
+        "User",
+        backref = db.backref("playlists", lazy="dynamic"))
+
+class Indexation(db.Model):
+    playlist_id = db.Column(db.Integer, db.ForeignKey("playlist.id"), primary_key=True)
+    album_id = db.Column(db.Integer, db.ForeignKey("album.id"), primary_key=True)
+
+    playlist = db.relationship(
+        "Playlist",
+        backref = db.backref("indexations", lazy="dynamic"))
+
+    album = db.relationship(
+        "Album",
+        backref = db.backref("indexations", lazy="dynamic"))
+
 def get_sample():
     return Album.query.limit(10).all()
 
@@ -52,6 +72,10 @@ def get_genre(id):
 
 def get_album(id):
     return Album.query.get(id)
+
+def get_albums(id_playlist):
+    pass
+    #return Album.query.filter() 
 
 class User(db.Model, UserMixin):
     username = db.Column(db.String(50), primary_key=True)
