@@ -1,8 +1,8 @@
 import click
 from .app import app, db
 import yaml
-from hashlib import sha256
 from .models import Artist, Album, Genre, Classification, User
+
 
 @app.cli.command()
 @click.argument('filename')
@@ -10,79 +10,75 @@ def loaddb(filename):
     ''' Creates the tables and populates them with data. '''
     # creation de toutes les tables
     db.create_all()
-    albums = yaml.load(open (filename))
+    albums = yaml.load(open(filename))
 
-    #creation des auteurs
+    # creation des auteurs
     artists = {}
     for al in albums:
         ar = al["by"]
         if ar not in artists:
-            o = Artist(name = ar)
+            o = Artist(name=ar)
             db.session.add(o)
             artists[ar] = o
     db.session.commit()
 
-    #creation des genres
+    # creation des genres
     genres = {}
     for al in albums:
         for g in al["genre"]:
             g = g.lower()
             if g not in genres:
-                o = Genre(name = g)
+                o = Genre(name=g)
                 db.session.add(o)
                 genres[g] = o
     db.session.commit()
 
-    #creation des livres
+    # creation des livres
     for al in albums:
         ar = artists[al["by"]]
         o = Album(
-            title = al["title"],
-            release = al["releaseYear"],
-            img = al["img"],
-            artist_id = ar.id
+            title=al["title"],
+            release=al["releaseYear"],
+            img=al["img"],
+            artist_id=ar.id
         )
         db.session.add(o)
     db.session.commit()
 
-    #creation des classifications (relation entre livres et genres)
+    # creation des classifications (relation entre livres et genres)
     for al in albums:
         al_id = Album.query.filter_by(title=al["title"]).first().id
         for g in al["genre"]:
             g = g.lower()
             g_id = Genre.query.filter_by(name=g).first().id
-            o = Classification(album_id = al_id, genre_id = g_id)
+            o = Classification(album_id=al_id, genre_id=g_id)
             db.session.add(o)
     db.session.commit()
+
 
 @app.cli.command()
 def syncdb():
     ''' Creates all missing tables '''
     db.create_all()
 
+
 @app.cli.command()
 @click.argument('username')
 @click.argument('password')
 def newuser(username, password):
     ''' Creates a new user '''
-    m = sha256()
-    m.update(password.encode())
-    u = User(username=username, password=m.hexdigest())
-    db.session.add(u)
-    db.session.commit()
+    return User.register(username, password)
+
 
 @app.cli.command()
 @click.argument('username')
 @click.argument('password')
 def passwd(username, password):
     ''' Changes password of an existing user '''
-    m = sha256()
-    m.update(password.encode())
     u = User.query.get(username)
     if u:
-        u.password = m.hexdigest()
-        db.session.commit()
+        u.set_password(password)
     else:
-        print("*"*50)
+        print("*" * 50)
         print("Il n'y a pas de compte associé au pseudo " + username)
-        print("*"*50)
+        print("*" * 50)
