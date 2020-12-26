@@ -3,8 +3,8 @@
 {% block navbar %}
     <!-- TODO à passer en paramètres ça serait sympa -->
     {% set navigation_bar = [
-    ('/artist/', 'all_artist', 'Artistes'),
-    ('/albums/', 'all_albums', 'Albums'),
+    ('/artist', 'all_artist', 'Artistes'),
+    ('/albums', 'all_albums', 'Albums'),
 
     ] -%}
     {% if current_user.is_authenticated %}
@@ -12,7 +12,7 @@
         ('/dashboard/', 'dashboard', 'Profil')
         ] -%}
     {% else %}
-        {% set navigation_bar_logged = list() -%}
+        {% set navigation_bar_logged = [] -%}
     {% endif %}
 
     {% set active_page = active_page|default('home') -%}
