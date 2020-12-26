@@ -23,4 +23,4 @@ class LoginForm(FlaskForm):
     name = StringField('Pseudo', validators=[DataRequired()])
 
     password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Log In')
+    submit = SubmitField('Connexion')
