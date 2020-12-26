@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% set active_page = "all_artist" %}
+
+{% macro build_list(dico_artists) %}
+    <!-- macro qui permet de générer les pages d'artistes à partir d'un dictionnaire -->
+    <ul class="list-group">
+        {% for artist in dico_artists %}
+            <li class="list-group-item">
+                {% include url_for("artist/includes/artist.html", artist = artist) %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% block main %}
+    {% for author in dico_authors %}
+        {% include 'artist/includes/artist.html' %}
+    {% endfor %}
+{% endblock %}
