@@ -1,13 +1,24 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block navbar %}
+    <!-- TODO à passer en paramètres ça serait sympa -->
+    {% set navigation_bar = [
+    ('/artist/', 'all_artist', 'Artistes'),
+    ('/albums/', 'all_albums', 'Albums'),
+
+    ] -%}
+    {% if current_user.is_authenticated %}
+        {% set navigation_bar_logged = [
+        ('/dashboard/', 'dashboard', 'Profil')
+        ] -%}
+    {% else %}
+        {% set navigation_bar_logged = list() -%}
+    {% endif %}
+
+    {% set active_page = active_page|default('home') -%}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href=
-                {% if current_user.is_authenticated %}
-                    {{ url_for('dashboard') }}
-                {% else %}
-                    "/"
-                {% endif %}
+
+        <a id="home" class="navbar-brand" href="/"
         >RockDB</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,17 +26,15 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="/">Accueil <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
 
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                </li>
+            <ul class="navbar-nav mr-auto">
+                {% for href, id, caption in navigation_bar + navigation_bar_logged %}
+                    <li class="nav-item {% if id == active_page %}active" style="  border-bottom: 1px solid black;
+                    {% endif %}"><a class="nav-link"
+                                    href="{{ href|e }}">
+                        {{ caption|e }}</a>
+                    </li>
+                {% endfor %}
             </ul>
             <form class="form-inline my-2 my-lg-0">
                 <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
