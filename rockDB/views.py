@@ -1,7 +1,7 @@
 from .app import app
 from .forms import LoginForm, SignupForm
 from .models import User
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
 
 
@@ -16,7 +16,12 @@ def home():
 @login_required
 @app.route("/dashboard")
 def dashboard():
-    return "allo"
+    return render_template(
+        'dashboard.html',
+        title='Logging out',
+        template='logout-page',
+        body="Deconnexion d'un utilisateur"
+    )
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -32,7 +37,7 @@ def login():
             login_user(user)
             next_page = request.args.get('next')
             flash('Vous êtes maintenant connecté', 'success')
-            return redirect(next_page or url_for('home'))
+            return redirect(next_page or url_for('dashboard'))
         flash('Erreur sur le pseudo/mot de passe', 'warning')
         return redirect(url_for('login'))
     return render_template(
@@ -77,11 +82,25 @@ def signup():
     )
 
 
+@login_required
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
-    return render_template(
-        'auth/logout.html',
-        title='Logging out',
-        template='logout-page',
-        body="Deconnexion d'un utilisateur"
-    )
+    logout_user()
+    if session.get('was_once_logged_in'):
+        # évite d'afficher un message qu'il a déjà eu
+        del session['was_once_logged_in']
+    flash('Vous êtes maintenant déconnecté', 'success')
+    return redirect('/')
+
+
+@app.route("/artist")
+def all_artist():
+    return render_template("artist/all_artist.html")
+
+
+from .models import Artist
+
+
+@app.route("/artist/one_artist/<int:id>")
+def one_artist(id):
+    return render_template("artist/one_artist.html", artist=Artist.from_id(id))
