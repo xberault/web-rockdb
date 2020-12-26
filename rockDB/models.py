@@ -1,5 +1,7 @@
 from .app import db, login_manager
 from flask_login import UserMixin
+from hashlib import sha256
+from sqlalchemy import func
 
 
 class Artist(db.Model):
@@ -8,6 +10,25 @@ class Artist(db.Model):
 
     def __repr__(self):
         return f"<Artiste ({self.id}) {self.name}>"
+
+    def __init__(self, id, name):
+        super()
+        self.id = id
+        self.name = name
+
+    @classmethod
+    def create_from_name(cls, name):
+        """
+        :param name: le nom de l'artiste
+        :return: l'artiste nouvellement crée
+        """
+        id = Artist.query(func.max(Artist.id)) + 1  # get highest one + 1
+        artist = Artist(id, name)
+        return artist
+
+    @classmethod
+    def from_id(cls, id):
+        return Artist.query.get(id)
 
 
 class Genre(db.Model):
@@ -27,7 +48,10 @@ class Album(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
     artist = db.relationship(
         "Artist",
-        backref=db.backref("albums", lazy="dynamic"))
+        backref=db.backref("artist", lazy="dynamic"))
+
+    def __init__(self, id, title, release, img, artist):
+        super(Album, self).__init__()
 
     def __repr__(self):
         return f"<Album ({self.id}) {self.title}>"
@@ -47,7 +71,6 @@ class Classification(db.Model):
 
 
 class Playlist(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.username"))
 
@@ -57,7 +80,6 @@ class Playlist(db.Model):
 
 
 class Indexation(db.Model):
-
     playlist_id = db.Column(db.Integer, db.ForeignKey("playlist.id"), primary_key=True)
     album_id = db.Column(db.Integer, db.ForeignKey("album.id"), primary_key=True)
 
@@ -91,18 +113,10 @@ def get_albums(id_playlist):
     # return Album.query.filter()
 
 
-
-
-from .app import db, login_manager
-from flask_login import UserMixin
-from werkzeug.security import check_password_hash
-
-
-from hashlib import sha256
-
 @login_manager.user_loader
 def load_user(username):
     return User.user_from_username(username)
+
 
 class User(db.Model, UserMixin):
     username = db.Column(db.String(50), primary_key=True)
