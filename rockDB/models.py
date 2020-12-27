@@ -11,18 +11,14 @@ class Artist(db.Model):
     def __repr__(self):
         return f"<Artiste ({self.id}) {self.name}>"
 
-    def __init__(self, id, name):
-        super()
-        self.id = id
-        self.name = name
-
     @classmethod
     def create_from_name(cls, name):
         """
         :param name: le nom de l'artiste
         :return: l'artiste nouvellement crée
         """
-        id = Artist.query(func.max(Artist.id)) + 1  # get highest one + 1
+        id = db.session.query(func.max(Artist.id)).scalar()  # get highest one + 1
+        id = id + 1 if id else 1  # if None
         artist = Artist(id, name)
         return artist
 
@@ -49,9 +45,6 @@ class Album(db.Model):
     artist = db.relationship(
         "Artist",
         backref=db.backref("artist", lazy="dynamic"))
-
-    def __init__(self, id, title, release, img, artist):
-        super(Album, self).__init__()
 
     def __repr__(self):
         return f"<Album ({self.id}) {self.title}>"

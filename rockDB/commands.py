@@ -10,7 +10,7 @@ def loaddb(filename):
     ''' Creates the tables and populates them with data. '''
     # creation de toutes les tables
     db.create_all()
-    albums = yaml.load(open(filename))
+    albums = yaml.safe_load(open(filename))
 
     # creation des auteurs
     artists = {}
