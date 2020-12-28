@@ -18,9 +18,9 @@ def home():
 def dashboard():
     return render_template(
         'dashboard.html',
-        title='Logging out',
-        template='logout-page',
-        body="Deconnexion d'un utilisateur"
+        title='Dashboard',
+        template='dashboard-page',
+        body="Page de profil d'un utilisateur"
     )
 
 
