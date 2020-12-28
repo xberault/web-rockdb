@@ -28,6 +28,12 @@ class Album(db.Model):
     title = db.Column(db.String(100))
     release = db.Column(db.Integer)
     img = db.Column(db.String(100))
+    parent = db.Column(db.String(100))
+    
+    # parent_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
+    # parent = db.relationship(
+    #     "Artist",
+    #     backref=db.backref("parent", lazy="dynamic"))
 
     artist_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
     artist = db.relationship(

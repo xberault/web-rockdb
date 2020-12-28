@@ -12,7 +12,7 @@ def loaddb(filename):
     db.create_all()
     albums = yaml.safe_load(open(filename))
 
-    # creation des auteurs
+    # creation des artistes
     artists = {}
     for al in albums:
         ar = al["by"]
@@ -20,6 +20,11 @@ def loaddb(filename):
             o = Artist(name=ar)
             db.session.add(o)
             artists[ar] = o
+        # p = al["parent"]
+        # if p not in artists:
+        #     o = Artist(name=p)
+        #     db.session.add(o)
+        #     artists[ar] = o
     db.session.commit()
 
     # creation des genres
@@ -36,11 +41,14 @@ def loaddb(filename):
     # creation des livres
     for al in albums:
         ar = artists[al["by"]]
+        # p = artists[al["parent"]]
         o = Album(
             title=al["title"],
             release=al["releaseYear"],
             img=al["img"],
-            artist_id=ar.id
+            artist_id=ar.id,
+            # parent_id=p.id
+            parent=al["parent"]
         )
         db.session.add(o)
     db.session.commit()
