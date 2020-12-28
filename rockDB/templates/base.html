@@ -9,7 +9,7 @@
     ] -%}
     {% if current_user.is_authenticated %}
         {% set navigation_bar_logged = [
-        ('/dashboard/', 'dashboard', 'Profil')
+        ('/dashboard', 'dashboard', 'Profil')
         ] -%}
     {% else %}
         {% set navigation_bar_logged = [] -%}
