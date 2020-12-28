@@ -49,7 +49,6 @@ def login():
     )
 
 
-from .commands import newuser
 from .models import load_user
 from flask import get_flashed_messages
 
@@ -71,6 +70,7 @@ def signup():
             return redirect(url_for('signup'))
         else:
             u = User.register(form.name.data, form.password.data)
+            login_user(u)
             flash("Vous êtes maintenant membre de RockDB", "success")
             return redirect(url_for('dashboard'))
     return render_template(
