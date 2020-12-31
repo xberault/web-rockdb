@@ -57,12 +57,12 @@ class Album(db.Model):
     # parent_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
     # parent = db.relationship(
     #     "Artist",
-    #     backref=db.backref("parent", lazy="dynamic"))
+    #     backref=db.backref("albums", lazy="dynamic"))
 
     artist_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
     artist = db.relationship(
         "Artist",
-        backref=db.backref("artist", lazy="dynamic"))
+        backref=db.backref("albums", lazy="dynamic"))
 
     @classmethod
     def create_and_add(cls, title, release, img, artist_id, parent):
@@ -128,6 +128,10 @@ class Playlist(db.Model):
         db.session.commit()
         return pl
 
+    @classmethod
+    def from_id(cls, id):
+        return Playlist.query.get_or_404(id)
+
 
 class Indexation(db.Model):
     playlist_id = db.Column(db.Integer, db.ForeignKey("playlist.id"), primary_key=True)
@@ -165,9 +169,17 @@ def get_album(id):
     return Album.query.get(id)
 
 
-def get_albums(id_playlist):
-    pass
-    # return Album.query.filter()
+def get_albums_from_playlist(id_playlist):
+    albums = []
+    indexations = Playlist.query.get(id_playlist).indexations.all()
+    for i in indexations:
+        album = Album.query.get(i.album_id)
+        albums.append(album)
+    return albums
+
+
+def get_playlists_from_user(user_id):
+    return User.query.get(user_id).playlists.all()
 
 
 @login_manager.user_loader

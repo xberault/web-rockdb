@@ -104,3 +104,22 @@ from .models import Artist
 @app.route("/artist/one_artist/<int:id>")
 def one_artist(id):
     return render_template("artist/one_artist.html", artist=Artist.from_id(id))
+
+
+from .models import Playlist, Indexation, get_albums_from_playlist, get_playlists_from_user
+
+@login_required
+@app.route("/playlists/<int:user_id>")
+def playlists(user_id):
+    return render_template(
+        "playlists.html",
+        playlists=get_playlists_from_user(user_id)
+    )
+
+@app.route("/playlist/<int:id>")
+def playlist(id):
+    return render_template(
+        "playlist.html",
+        playlist=Playlist.from_id(id),
+        albums=get_albums_from_playlist(id)
+    )
