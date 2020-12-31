@@ -128,6 +128,10 @@ class Playlist(db.Model):
         db.session.commit()
         return pl
 
+    @classmethod
+    def from_id(cls, id):
+        return Playlist.query.get_or_404(id)
+
 
 class Indexation(db.Model):
     playlist_id = db.Column(db.Integer, db.ForeignKey("playlist.id"), primary_key=True)
