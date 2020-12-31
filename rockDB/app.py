@@ -16,7 +16,7 @@ Bootstrap(app)
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-        'sqlite:///' + mkpath('../myapp.db')
+        'sqlite:///' + mkpath('../rockDB.db')
 )
 db = SQLAlchemy(app)
 
