@@ -116,7 +116,7 @@ def playlists(user_id):
         playlists=get_playlists_from_user(user_id)
     )
 
-@app.route("playlist/<int:id>")
+@app.route("/playlist/<int:id>")
 def playlist(id):
     return render_template(
         "playlist.html",
