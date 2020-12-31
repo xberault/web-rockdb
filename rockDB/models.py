@@ -7,6 +7,18 @@ class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
 
+    @classmethod
+    def create_and_add(cls, name):
+        """
+        ajoute un artiste à la bd
+        :param name:
+        :return: l'artiste nouvellement créé
+        """
+        a = Artist(name=name)
+        db.session.add(a)
+        db.session.commit()
+        return a
+
     def __repr__(self):
         return f"<Artiste ({self.id}) {self.name}>"
 
@@ -19,6 +31,18 @@ class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
 
+    @classmethod
+    def create_and_add(cls, name):
+        """
+        ajoute un genre à la bd
+        :param name:
+        :return: le genre nouvellement créé
+        """
+        g = Genre(name=name)
+        db.session.add(g)
+        db.session.commit()
+        return g
+
     def __repr__(self):
         return f"<Genre ({self.id}) {self.name}>"
 
@@ -29,7 +53,7 @@ class Album(db.Model):
     release = db.Column(db.Integer)
     img = db.Column(db.String(100))
     parent = db.Column(db.String(100))
-    
+
     # parent_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
     # parent = db.relationship(
     #     "Artist",
@@ -39,6 +63,28 @@ class Album(db.Model):
     artist = db.relationship(
         "Artist",
         backref=db.backref("artist", lazy="dynamic"))
+
+    @classmethod
+    def create_and_add(cls, title, release, img, artist_id, parent):
+        """
+        ajoute un album à la bd
+        :param title:
+        :param release:
+        :param img:
+        :param artist_id:
+        :param parent:
+        :return: l'album nouvellement créé
+        """
+        a = Album(
+            title=title,
+            release=release,
+            img=img,
+            artist_id=artist_id,
+            parent=parent
+        )
+        db.session.add(a)
+        db.session.commit()
+        return a
 
     def __repr__(self):
         return f"<Album ({self.id}) {self.title}>"
@@ -56,6 +102,16 @@ class Classification(db.Model):
         "Genre",
         backref=db.backref("classifications", lazy="dynamic"))
 
+    @classmethod
+    def create_and_add(cls, album_id, genre_id):
+        c = Classification(
+            album_id=album_id,
+            genre_id=genre_id
+        )
+        db.session.add(c)
+        db.session.commit()
+        return c
+
 
 class Playlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,6 +120,13 @@ class Playlist(db.Model):
     user = db.relationship(
         "User",
         backref=db.backref("playlists", lazy="dynamic"))
+
+    @classmethod
+    def create_and_add(cls, user_id):
+        pl = Playlist(user_id=user_id)
+        db.session.add(pl)
+        db.session.commit()
+        return pl
 
 
 class Indexation(db.Model):
@@ -77,6 +140,13 @@ class Indexation(db.Model):
     album = db.relationship(
         "Album",
         backref=db.backref("indexations", lazy="dynamic"))
+
+    @classmethod
+    def create_and_add(cls, playlist_id, album_id):
+        i = Indexation(playlist_id=playlist_id, album_id=album_id)
+        db.session.add(i)
+        db.session.commit()
+        return i
 
 
 def get_sample():
@@ -144,7 +214,7 @@ class User(db.Model, UserMixin):
         ajoute un utilisateur à la bd
         :param username:
         :param password:
-        :return: l'utilisateur nouvellement crée
+        :return: l'utilisateur nouvellement créé
         """
         m = sha256()
         m.update(password.encode())

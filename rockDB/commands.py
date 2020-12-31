@@ -19,6 +19,7 @@ def loaddb(filename):
         if ar not in artists:
             o = Artist(name=ar)
             db.session.add(o)
+            # o = Artist.create(name=ar) (en fait non)
             artists[ar] = o
         # p = al["parent"]
         # if p not in artists:
