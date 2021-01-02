@@ -152,6 +152,19 @@ class Indexation(db.Model):
         db.session.commit()
         return i
 
+class Notation(db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey("user.username", primary_key=True))
+    album_id = db.Column(db.Integer, db.ForeignKey("album.id"), primary_key=True)
+    note = db.Column(db.Integer)
+
+    user = db.relationship(
+        "User",
+        backref=db.backref("notations", lazy="dynamic"))
+
+    album = db.relationship(
+        "Album",
+        backref=db.backref("notations", lazy="dynamic"))
+
 
 def get_sample():
     return Album.query.limit(10).all()
