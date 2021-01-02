@@ -10,8 +10,7 @@ ITEMS_PER_PAGE = 8
 def home():
     return render_template(
         "home.html",
-        title="RockDB",
-        genders = get_sample_genre()
+        title="RockDB"
     )
 
 
@@ -22,8 +21,7 @@ def dashboard():
         'dashboard.html',
         title='Dashboard',
         template='dashboard-page',
-        body="Page de profil d'un utilisateur",
-        genders = get_sample_genre()
+        body="Page de profil d'un utilisateur"
     )
 
 
@@ -48,8 +46,7 @@ def login():
         form=form,
         title='Connexion',
         template='login-page',
-        body="Connexion au compte utilisateur",
-        genders = get_sample_genre()
+        body="Connexion au compte utilisateur"
     )
 
 
@@ -82,8 +79,7 @@ def signup():
         title='Inscription',
         form=form,
         template='signup-page',
-        body="Inscription d'un utilisateur",
-        genders = get_sample_genre()
+        body="Inscription d'un utilisateur"
     )
 
 
@@ -100,7 +96,7 @@ def logout():
 
 @app.route("/artist")
 def all_artist_default():
-    return render_template("artist/all_artist.html", test = get_sample_artist(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+    return render_template("artist/all_artist.html", title="All artists page 0", artists = get_sample_artist(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
 
 @app.route("/artist/<int:page_number>")
 def all_artist(page_number):
@@ -121,7 +117,7 @@ def all_artist(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             artists = get_sample_artist(lower_limit,upper_limit)
 
-    return render_template("artist/all_artist.html", test = get_sample_artist(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
+    return render_template("artist/all_artist.html", title="All artists page "+str(page_number), artists = get_sample_artist(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
 
 
 from .models import Artist
@@ -129,11 +125,12 @@ from .models import Artist
 
 @app.route("/artist/one_artist/<int:id>")
 def one_artist(id):
-    return render_template("artist/one_artist.html", artist=Artist.from_id(id), genders = get_sample_genre())
+    artist=Artist.from_id(id)
+    return render_template("artist/one_artist.html", title=artist.name, artist=artist)
 
 @app.route("/album")
 def all_album_default():
-    return render_template ("album/all_album.html", albums = get_sample_album(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+    return render_template ("album/all_album.html", title="All albums page 0", albums = get_sample_album(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
 
 @app.route("/album/<int:page_number>")
 def all_album(page_number):
@@ -155,7 +152,7 @@ def all_album(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             albums = get_sample_album(lower_limit,upper_limit)
     
-    return render_template("album/all_album.html", albums = get_sample_album(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
+    return render_template("album/all_album.html", title="All albums page "+str(page_number), albums = get_sample_album(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
 
 
 from .models import Album
@@ -163,7 +160,8 @@ from .models import Album
 
 @app.route("/album/one_album/<int:id>")
 def one_album(id):
-    return render_template("album/one_album.html", album=Album.from_id(id), genders = get_sample_genre())
+    album=Album.from_id(id)
+    return render_template("album/one_album.html", title=album.title, album = album)
 
 
 from .models import Playlist, Indexation, get_albums_from_playlist, get_playlists_from_user
@@ -173,8 +171,7 @@ from .models import Playlist, Indexation, get_albums_from_playlist, get_playlist
 def playlists(user_id):
     return render_template(
         "playlists.html",
-        playlists=get_playlists_from_user(user_id),
-        genders = get_sample_genre()
+        playlists=get_playlists_from_user(user_id)
     )
 
 @app.route("/playlist/<int:id>")
@@ -182,6 +179,5 @@ def playlist(id):
     return render_template(
         "playlist.html",
         playlist=Playlist.from_id(id),
-        albums=get_albums_from_playlist(id),
-        genders = get_sample_genre()
+        albums=get_albums_from_playlist(id)
     )
