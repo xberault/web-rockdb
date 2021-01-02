@@ -2,16 +2,5 @@
 {% set active_page = "one_artist" %}
 
 {% block main %}
-<div class="card text-center" style="width: 18rem;">
-    <img class="card-img-top"
-         src="https://www.history.ox.ac.uk/sites/default/files/history/images/person/unknown-person-icon-4_0.jpg"
-         alt=" Image of{{ artist.name }}">
-    <div class="card-body">
-        <p class="card-text">Une descrition pourrait en effet être implémentée
-        </p>
-
-        <a href="{{ url_for('one_artist',id =  artist.id ) }}" class="btn btn-primary">Voir
-            réalisations</a>
-    </div>
-</div>
+{% include 'artist/includes/artist.html' %}
 {% endblock %}

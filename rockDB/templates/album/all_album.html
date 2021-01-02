@@ -1,27 +1,47 @@
 {% extends "base.html" %}
 {% set active_page = "all_album" %}
 
+{% block navbarperso %}
+<form class="form-inline my-2 my-lg-0">
+  <div class="form-row align-items-center">
+    <div class="col-auto my-1">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+    </div>
+    <div class="col-auto my-1">
+        <label for="genre" class="my-2 my-lg-0">by</label>
+    </div>
+    <div class="col-auto my-1">
+      <select name="genre" id="genre" class="custom-select my-2 my-lg-0" required>
+        <option selected>Choose ...</option>
+        <option value="realse">Realesed in</option>
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+      </select>
+    </div>
+    <div class="col-auto my-1">
+      <label for="genre" class="my-2 my-lg-0">Gender</label>
+    </div>
+    <div class="col-auto my-1">
+      <select name="genre" id="genre" class="custom-select my-2 my-lg-0">
+          <option selected>Choose ...</option>
+          {% for gender in genders %}
+          <option value="{{ gender.id }}">{{ gender.name }}</option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto my-1">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
 {% block main %}
 <div class="album py-5 bg-light">
   <div class="container">
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
       {% for album in albums %}
-      <div class="col">
-        <div class="card shadow-sm">
-          <img class="bd-placeholder-img card-img-top" width="100%" height="225" {% if album.img != None %} src="{{ url_for('static', filename='images/'+ album.img) }}" {% else %} src="{{ url_for('static', filename='images/album_vierge.jpeg') }}" {% endif %} alt="" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
-          <div class="card-body">
-            <p class="card-text">{{ album.title }}</p>
-            <p>Par <a href="{{ url_for('one_artist',id =  album.artist_id ) }}" class="btn btn-sm btn-outline-secondary">{{ album.artist.name }}</a></p>
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="btn-group">
-                <a href="{{ url_for('one_album',id =  album.id ) }}" class="btn btn-sm btn-outline-secondary">View</a>
-                <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-              </div>
-              <small class="text-muted">{{ album.release }}</small>
-            </div>
-          </div>
-        </div>
-      </div>
+      {% include "album/includes/album.html" %}
       {% endfor %}
     </div>
   </div>
@@ -31,8 +51,5 @@
   <a href="{{ url_for('all_album',page_number = page_number-1)}}" class="btn btn-sm btn-outline-secondary">Page prec</a>
   {% endif %}
   <a href="{{ url_for('all_album',page_number = page_number+1)}}" class="btn btn-sm btn-outline-secondary">Page suiv</a>
-  {% endblock %}
 </div>
-
-
-<!-- <button type="button" class="btn btn-sm btn-outline-secondary">View</button> -->
+{% endblock %}

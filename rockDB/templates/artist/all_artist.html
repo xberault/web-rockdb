@@ -1,23 +1,53 @@
 {% extends "base.html" %}
 {% set active_page = "all_artist" %}
 
+{% block navbarperso %}
+<form class="form-inline my-2 my-lg-0">
+  <div class="form-row align-items-center">
+    <div class="col-auto my-1">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+    </div>
+    <div class="col-auto my-1">
+        <label for="genre" class="my-2 my-lg-0">by</label>
+    </div>
+    <div class="col-auto my-1">
+        <select name="genre" id="genre" class="custom-select my-2 my-lg-0" required>
+            <option selected>Choose ...</option>
+            <option value="author">Name</option>
+        </select>
+    </div>
+    <div class="col-auto my-1">
+      <label for="genre" class="my-2 my-lg-0">Gender</label>
+    </div>
+    <div class="col-auto my-1">
+      <select name="genre" id="genre" class="custom-select my-2 my-lg-0">
+          <option selected>Choose ...</option>
+          {% for gender in genders %}
+          <option value="{{ gender.id }}">{{ gender.name }}</option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto my-1">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
 {% block main %}
-<ul class="list-group">
-    {% for artist in test %}
-        <li class="list-group-item">
-            <div class="card text-center" style="width: 18rem;">
-                <img class="card-img-top"
-                     src="https://www.history.ox.ac.uk/sites/default/files/history/images/person/unknown-person-icon-4_0.jpg"
-                     alt=" Image of{{ artist.name }}">
-                <div class="card-body">
-                    <p class="card-text">Une descrition pourrait en effet être implémentée
-                    </p>
-            
-                    <a href="{{ url_for('one_artist',id =  artist.id ) }}" class="btn btn-primary">Voir
-                        réalisations</a>
-                </div>
-            </div>
-        </li>
-    {% endfor %}
-</ul>
+<div class="album py-5 bg-light">
+  <div class="container">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+      {% for artist in test %}
+          {% include 'artist/includes/artist.html' %}
+      {% endfor %}
+      </div>
+  </div>
+</div>
+<div class="btn-group">
+  {% if page_number > 0 %}
+  <a href="{{ url_for('all_artist',page_number = page_number-1)}}" class="btn btn-sm btn-outline-secondary">Page prec</a>
+  {% endif %}
+  <a href="{{ url_for('all_artist',page_number = page_number+1)}}" class="btn btn-sm btn-outline-secondary">Page suiv</a>
+</div>
 {% endblock %}

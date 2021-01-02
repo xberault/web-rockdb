@@ -4,6 +4,7 @@ from .models import User, get_sample_artist, get_sample_album, get_sample_genre
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
 
+ITEMS_PER_PAGE = 8
 
 @app.route("/")
 def home():
@@ -98,9 +99,29 @@ def logout():
 
 
 @app.route("/artist")
-def all_artist():
-    print(get_sample_artist())
-    return render_template("artist/all_artist.html", test = get_sample_artist(), genders = get_sample_genre())
+def all_artist_default():
+    return render_template("artist/all_artist.html", test = get_sample_artist(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+
+@app.route("/artist/<int:page_number>")
+def all_artist(page_number):
+    if page_number < 0:
+        page_number = 0
+
+    lower_limit = page_number * ITEMS_PER_PAGE
+    upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    
+    artists = get_sample_artist(lower_limit,upper_limit)
+
+    while len(artists) <= 0:
+        if page_number == 0:
+            break
+        else:
+            page_number -= 1
+            lower_limit = page_number * ITEMS_PER_PAGE
+            upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+            artists = get_sample_artist(lower_limit,upper_limit)
+
+    return render_template("artist/all_artist.html", test = get_sample_artist(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
 
 
 from .models import Artist
@@ -112,7 +133,7 @@ def one_artist(id):
 
 @app.route("/album")
 def all_album_default():
-    return render_template ("album/all_album.html", albums = get_sample_album(0,5), page_number = 0, genders = get_sample_genre())
+    return render_template ("album/all_album.html", albums = get_sample_album(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
 
 @app.route("/album/<int:page_number>")
 def all_album(page_number):
@@ -120,8 +141,8 @@ def all_album(page_number):
     if page_number < 0:
         page_number = 0
 
-    lower_limit = page_number * 5
-    upper_limit = page_number * 5 + 5
+    lower_limit = page_number * ITEMS_PER_PAGE
+    upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
     
     albums = get_sample_album(lower_limit,upper_limit)
 
@@ -130,8 +151,8 @@ def all_album(page_number):
             break
         else:
             page_number -= 1
-            lower_limit = page_number * 5
-            upper_limit = page_number * 5 + 5
+            lower_limit = page_number * ITEMS_PER_PAGE
+            upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             albums = get_sample_album(lower_limit,upper_limit)
     
     return render_template("album/all_album.html", albums = get_sample_album(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())

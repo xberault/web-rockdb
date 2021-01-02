@@ -1,0 +1,17 @@
+<div class="col">
+  <div class="card shadow-sm">
+    <img class="bd-placeholder-img card-img-top" width="100%" height="225" {% if album.img != None %} src="{{ url_for('static', filename='images/'+ album.img) }}" {% else %} src="{{ url_for('static', filename='images/album_vierge.jpeg') }}" {% endif %} alt=" Image of{{ album.title }}" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+    <div class="card-body">
+      <p class="card-text">{{ album.title }}</p>
+      <p>Par <a href="{{ url_for('one_artist',id =  album.artist_id ) }}" class="btn btn-sm btn-outline-secondary">{{ album.artist.name }}</a></p>
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- <p>Droit d'auteur : {{ album.parent }}</p> -->
+        <div class="btn-group">
+          <a href="{{ url_for('one_album',id =  album.id ) }}" class="btn btn-sm btn-outline-secondary">View</a>
+          <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+        </div>
+        <small class="text-muted">{{ album.release }}</small>
+      </div>
+    </div>
+  </div>
+</div>
