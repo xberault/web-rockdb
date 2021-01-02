@@ -37,8 +37,22 @@
                 {% endfor %}
             </ul>
             <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                <div class="form-row align-items-center">
+                    <div class="col-auto my-1">
+                        <label for="genre" class="my-2 my-lg-0 sr-only">Gender</label>
+                        <select name="genre" id="genre" class="custom-select my-2 my-lg-0">
+                            <option selected>Choose ...</option>
+                            {% for gender in genders %}
+                            <option value="{{ gender.id }}">{{ gender.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto my-1"></div>
+                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                    </div>
+                    <div class="col-auto my-1"></div>
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </div>
             </form>
             {% if current_user.is_authenticated %}
                 <div class="btn-group">
