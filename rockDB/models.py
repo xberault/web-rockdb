@@ -152,6 +152,7 @@ class Indexation(db.Model):
         db.session.commit()
         return i
 
+
 class Notation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.username", primary_key=True))
     album_id = db.Column(db.Integer, db.ForeignKey("album.id"), primary_key=True)
@@ -171,6 +172,10 @@ class Notation(db.Model):
         db.session.add(n)
         db.session.commit()
         return n
+
+    def __repr__(self):
+        return f"<Notation ({self.user_id}, {self.album_id}) {self.note}>"
+
 
 def get_sample():
     return Album.query.limit(10).all()
