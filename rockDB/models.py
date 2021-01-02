@@ -165,6 +165,12 @@ class Notation(db.Model):
         "Album",
         backref=db.backref("notations", lazy="dynamic"))
 
+    @classmethod
+    def create_and_add(cls, user_id, album_id, note):
+        n = Notation(user_id=user_id, album_id=album_id, note=note)
+        db.session.add(n)
+        db.session.commit()
+        return n
 
 def get_sample():
     return Album.query.limit(10).all()
