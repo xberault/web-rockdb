@@ -1,19 +1,23 @@
 {% extends "base.html" %}
 {% set active_page = "all_artist" %}
 
-{% macro build_list(dico_artists) %}
-    <!-- macro qui permet de générer les pages d'artistes à partir d'un dictionnaire -->
-    <ul class="list-group">
-        {% for artist in dico_artists %}
-            <li class="list-group-item">
-                {% include url_for("artist/includes/artist.html", artist = artist) %}
-            </li>
-        {% endfor %}
-    </ul>
-{% endmacro %}
-
 {% block main %}
-    {% for author in dico_authors %}
-        {% include 'artist/includes/artist.html' %}
+<ul class="list-group">
+    {% for artist in test %}
+        <li class="list-group-item">
+            <div class="card text-center" style="width: 18rem;">
+                <img class="card-img-top"
+                     src="https://www.history.ox.ac.uk/sites/default/files/history/images/person/unknown-person-icon-4_0.jpg"
+                     alt=" Image of{{ artist.name }}">
+                <div class="card-body">
+                    <p class="card-text">Une descrition pourrait en effet être implémentée
+                    </p>
+            
+                    <a href="{{ url_for('one_artist',id =  artist.id ) }}" class="btn btn-primary">Voir
+                        réalisations</a>
+                </div>
+            </div>
+        </li>
     {% endfor %}
+</ul>
 {% endblock %}

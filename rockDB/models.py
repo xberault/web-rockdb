@@ -3,6 +3,10 @@ from flask_login import UserMixin
 from hashlib import sha256
 
 
+# **************************************************************************** #
+# ************************* gestion des artistes ***************************** #
+# **************************************************************************** #
+
 class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -26,6 +30,15 @@ class Artist(db.Model):
     def from_id(cls, id):
         return Artist.query.get(id)
 
+def get_sample_artist(lower_limit = 0, upper_limit = 10):
+    return Artist.query.all()[lower_limit:upper_limit]
+
+def get_artist(id):
+    return Artist.query.get(id)
+
+# **************************************************************************** #
+# ************************** gestion des genres ****************************** #
+# **************************************************************************** #
 
 class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,6 +59,12 @@ class Genre(db.Model):
     def __repr__(self):
         return f"<Genre ({self.id}) {self.name}>"
 
+def get_genre(id):
+    return Genre.query.get(id)
+
+# **************************************************************************** #
+# ************************** gestion des albums ****************************** #
+# **************************************************************************** #
 
 class Album(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,7 +107,20 @@ class Album(db.Model):
 
     def __repr__(self):
         return f"<Album ({self.id}) {self.title}>"
+    
+    @classmethod
+    def from_id(cls, id):
+        return Album.query.get(id)
 
+def get_sample_album(lower_limit = 0, upper_limit = 10):
+    return Album.query.all()[lower_limit:upper_limit]
+
+def get_album(id):
+    return Album.query.get(id)
+
+# **************************************************************************** #
+# ******************* gestion relations albums genres ************************ #
+# **************************************************************************** #
 
 class Classification(db.Model):
     album_id = db.Column(db.Integer, db.ForeignKey("album.id"), primary_key=True)
@@ -112,6 +144,9 @@ class Classification(db.Model):
         db.session.commit()
         return c
 
+# **************************************************************************** #
+# ************************ gestion des playlists ***************************** #
+# **************************************************************************** #
 
 class Playlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -176,23 +211,6 @@ class Notation(db.Model):
     def __repr__(self):
         return f"<Notation ({self.user_id}, {self.album_id}) {self.note}>"
 
-
-def get_sample():
-    return Album.query.limit(10).all()
-
-
-def get_artist(id):
-    return Artist.query.get(id)
-
-
-def get_genre(id):
-    return Genre.query.get(id)
-
-
-def get_album(id):
-    return Album.query.get(id)
-
-
 def get_albums_from_playlist(id_playlist):
     albums = []
     indexations = Playlist.query.get(id_playlist).indexations.all()
@@ -205,11 +223,9 @@ def get_albums_from_playlist(id_playlist):
 def get_playlists_from_user(user_id):
     return User.query.get(user_id).playlists.all()
 
-
-@login_manager.user_loader
-def load_user(username):
-    return User.user_from_username(username)
-
+# **************************************************************************** #
+# *********************** gestion des utilisateurs *************************** #
+# **************************************************************************** #
 
 class User(db.Model, UserMixin):
     username = db.Column(db.String(50), primary_key=True)
@@ -262,3 +278,7 @@ class User(db.Model, UserMixin):
     @classmethod
     def user_from_username(cls, username):
         return User.query.get(username)
+
+@login_manager.user_loader
+def load_user(username):
+    return User.user_from_username(username)
