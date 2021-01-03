@@ -1,5 +1,5 @@
 from .app import app
-from .forms import LoginForm, SignupForm
+from .forms import LoginForm, SignupForm, ReseachAlbum, ReseachArtist
 from .models import User, get_sample_artist, get_sample_album, get_sample_genre
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
@@ -93,21 +93,34 @@ def logout():
     flash('Vous êtes maintenant déconnecté', 'success')
     return redirect('/')
 
+# ***************************************************** #
+# ************ routes pour les artists **************** #
+# ***************************************************** #
+
+from .models import Artist
 
 @app.route("/artist")
 def all_artist_default():
-    return render_template("artist/all_artist.html", title="All artists page 0", artists = get_sample_artist(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+    return redirect('artist/0')
 
 @app.route("/artist/<int:page_number>")
-def all_artist(page_number):
+def all_artist(page_number, filter_gender="", filter_type="", filter_value=""):
+
+    # ******************************* # 
+    # sécurité sur le nombre de pages #
+    # ******************************* #
+
+    # pour ne pas aller a la page -1 (ne préviens d'une saisie directe dans l'url) 
     if page_number < 0:
         page_number = 0
 
+    # pour ne pas afficher une page vierge
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
     
     artists = get_sample_artist(lower_limit,upper_limit)
 
+    # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
     while len(artists) <= 0:
         if page_number == 0:
             break
@@ -117,10 +130,27 @@ def all_artist(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             artists = get_sample_artist(lower_limit,upper_limit)
 
-    return render_template("artist/all_artist.html", title="All artists page "+str(page_number), artists = get_sample_artist(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
+    # ******************************* # 
+    #    sécurité sur les filtres     #
+    # ******************************* # 
 
+    genders = get_sample_genre()
+    if filter_gender not in genders:
+        filter_gender = ""
 
-from .models import Artist
+    types = ["release","title","author"]
+    if filter_type not in types:
+        filter_type = ""
+
+    return render_template("artist/all_artist.html",
+                           title="All artists page "+str(page_number),
+                           form=ReseachArtist(),
+                           dest="all_artist",
+                           artists = get_sample_artist(lower_limit,upper_limit),
+                           page_number = page_number,
+                           filter_gender = filter_gender,
+                           filter_type = filter_type,
+                           filter_value = "")
 
 
 @app.route("/artist/one_artist/<int:id>")
@@ -128,21 +158,33 @@ def one_artist(id):
     artist=Artist.from_id(id)
     return render_template("artist/one_artist.html", title=artist.name, artist=artist)
 
-@app.route("/album")
+
+# ***************************************************** #
+# ************ routes pour les albums ***************** #
+# ***************************************************** #
+
+@app.route("/album", methods=['GET', 'POST'])
 def all_album_default():
-    return render_template ("album/all_album.html", title="All albums page 0", albums = get_sample_album(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+    return redirect('album/0')
 
 @app.route("/album/<int:page_number>")
-def all_album(page_number):
+def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
+    
+    # ******************************* # 
+    # sécurité sur le nombre de pages #
+    # ******************************* # 
 
+    # pour ne pas aller a la page -1 (ne préviens d'une saisie directe dans l'url) 
     if page_number < 0:
         page_number = 0
 
+    # pour ne pas afficher une page vierge
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
     
     albums = get_sample_album(lower_limit,upper_limit)
 
+    # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
     while len(albums) <= 0:
         if page_number == 0:
             break
@@ -151,8 +193,28 @@ def all_album(page_number):
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             albums = get_sample_album(lower_limit,upper_limit)
+
+    # ******************************* # 
+    #    sécurité sur les filtres     #
+    # ******************************* # 
+
+    genders = get_sample_genre()
+    if filter_gender not in genders:
+        filter_gender = ""
+
+    types = ["release","title","author"]
+    if filter_type not in types:
+        filter_type = ""
     
-    return render_template("album/all_album.html", title="All albums page "+str(page_number), albums = get_sample_album(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
+    return render_template("album/all_album.html",
+                           title="All albums page "+str(page_number),
+                           form=ReseachAlbum(),
+                           dest="all_album",
+                           albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit),
+                           page_number = page_number,
+                           filter_gender = filter_gender,
+                           filter_type = filter_type,
+                           filter_value = "")
 
 
 from .models import Album

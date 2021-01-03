@@ -63,7 +63,7 @@ def get_genre(id):
     return Genre.query.get(id)
 
 def get_sample_genre():
-    return Genre.query.distinct()
+    return Genre.query.distinct().order_by(Genre.name)
 
 # **************************************************************************** #
 # ************************** gestion des albums ****************************** #
@@ -115,8 +115,21 @@ class Album(db.Model):
     def from_id(cls, id):
         return Album.query.get(id)
 
-def get_sample_album(lower_limit = 0, upper_limit = 10):
+def get_sample_album(filter_gender="", filter_type="", filter_value="",lower_limit = 0, upper_limit = 10):
+    if filter_type == "title":
+        return Album.query.filter(Album.title.like('%'+filter_value+'%'))[lower_limit:upper_limit]
+    if filter_type == "author":
+        return Album.query.filter(Album.artist.name.like('%'+filter_value+'%'))[lower_limit:upper_limit]
+    if filter_type == "release":
+        try:
+            date = int(filter_value)
+            return Album.query.filter(Album.title.like('%'+filter_value+'%'))[lower_limit:upper_limit]
+        except:
+            return Album.query.all()[lower_limit:upper_limit]
     return Album.query.all()[lower_limit:upper_limit]
+
+    
+
 
 def get_album(id):
     return Album.query.get(id)
