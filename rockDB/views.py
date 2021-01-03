@@ -96,7 +96,7 @@ def logout():
 
 @app.route("/artist")
 def all_artist_default():
-    return render_template("artist/all_artist.html", title="All artists page 0", artists = get_sample_artist(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+    return redirect('artist/0')
 
 @app.route("/artist/<int:page_number>")
 def all_artist(page_number):
@@ -105,7 +105,7 @@ def all_artist(page_number):
 
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-    
+
     artists = get_sample_artist(lower_limit,upper_limit)
 
     while len(artists) <= 0:
@@ -117,7 +117,13 @@ def all_artist(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             artists = get_sample_artist(lower_limit,upper_limit)
 
-    return render_template("artist/all_artist.html", title="All artists page "+str(page_number), artists = get_sample_artist(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
+    return render_template(
+        "artist/all_artist.html",
+        title="All artists page "+str(page_number),
+        artists=get_sample_artist(lower_limit,upper_limit),
+        page_number=page_number,
+        genders=get_sample_genre()
+    )
 
 
 from .models import Artist
@@ -126,11 +132,15 @@ from .models import Artist
 @app.route("/artist/one_artist/<int:id>")
 def one_artist(id):
     artist=Artist.from_id(id)
-    return render_template("artist/one_artist.html", title=artist.name, artist=artist)
+    return render_template(
+        "artist/one_artist.html",
+        title=artist.name,
+        artist=artist
+    )
 
 @app.route("/album")
 def all_album_default():
-    return render_template ("album/all_album.html", title="All albums page 0", albums = get_sample_album(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+    return redirect('album/0')
 
 @app.route("/album/<int:page_number>")
 def all_album(page_number):
@@ -140,7 +150,7 @@ def all_album(page_number):
 
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-    
+
     albums = get_sample_album(lower_limit,upper_limit)
 
     while len(albums) <= 0:
@@ -151,8 +161,14 @@ def all_album(page_number):
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             albums = get_sample_album(lower_limit,upper_limit)
-    
-    return render_template("album/all_album.html", title="All albums page "+str(page_number), albums = get_sample_album(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
+
+    return render_template(
+        "album/all_album.html",
+        title="All albums page "+str(page_number),
+        albums = get_sample_album(lower_limit,upper_limit),
+        page_number = page_number,
+        genders = get_sample_genre()
+    )
 
 
 from .models import Album
@@ -161,23 +177,29 @@ from .models import Album
 @app.route("/album/one_album/<int:id>")
 def one_album(id):
     album=Album.from_id(id)
-    return render_template("album/one_album.html", title=album.title, album = album)
+    return render_template(
+        "album/one_album.html",
+        title=album.title,
+        album = album
+    )
 
 
 from .models import Playlist, Indexation, get_albums_from_playlist, get_playlists_from_user
 
 @login_required
-@app.route("/playlists/<int:user_id>")
+@app.route("/playlist/<int:user_id>")
 def playlists(user_id):
     return render_template(
-        "playlists.html",
+        "playlist/playlist.html",
+        title="Playlist de "+user_id,
         playlists=get_playlists_from_user(user_id)
     )
 
-@app.route("/playlist/<int:id>")
+@app.route("/one_playlist/<int:id>")
 def playlist(id):
     return render_template(
-        "playlist.html",
+        "playlist/one_playlist.html",
+        title="Playlist n°"+str(id),
         playlist=Playlist.from_id(id),
         albums=get_albums_from_playlist(id)
     )
