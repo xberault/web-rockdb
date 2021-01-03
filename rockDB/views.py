@@ -187,16 +187,20 @@ def one_album(id):
 from .models import Playlist, Indexation, get_albums_from_playlist, get_playlists_from_user
 
 @login_required
-@app.route("/playlist/<int:user_id>")
+@app.route("/playlist/<string:user_id>")
 def playlists(user_id):
+    playlists = dict()
+    for pl in get_playlists_from_user(user_id):
+        playlists[pl] = get_albums_from_playlist(pl.id)
+
     return render_template(
         "playlist/playlist.html",
-        title="Playlist de "+user_id,
-        playlists=get_playlists_from_user(user_id)
+        title="Playlists de "+user_id,
+        playlists=playlists
     )
 
 @app.route("/one_playlist/<int:id>")
-def playlist(id):
+def one_playlist(id):
     return render_template(
         "playlist/one_playlist.html",
         title="Playlist n°"+str(id),

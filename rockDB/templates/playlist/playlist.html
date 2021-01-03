@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+{% for pl in playlists %}
+<div class="card">
+  <div class="card-header">
+    Playlist n°{{pl.id}}
+  </div>
+  <div class="card-body">
+    <div class="row">
+      {% for album in playlists[pl] %}
+      <div class="col-sm-2">
+        <div class="thumbnail">
+          <a href="{{ url_for('one_album', id=album.id) }}">
+            <img class="bd-placeholder-img img-fluid" max-width="100%" height="auto"
+              {% if album.img != None %}
+                src="{{ url_for('static', filename='images/'+ album.img) }}"
+              {% else %}
+                src="{{ url_for('static', filename='images/album_vierge.jpeg') }}"
+              {% endif %} alt=" Image of{{ album.title }}"
+              role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+            <div class="caption">
+              <p>{{album.title}}</p>
+            </div>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <a href="{{ url_for('one_playlist', id=pl.id) }}" class="btn btn-primary">Voir</a>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
