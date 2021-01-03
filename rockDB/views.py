@@ -1,9 +1,10 @@
 from .app import app
 from .forms import LoginForm, SignupForm
-from .models import User
+from .models import User, get_sample_artist, get_sample_album, get_sample_genre
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
 
+ITEMS_PER_PAGE = 8
 
 @app.route("/")
 def home():
@@ -94,8 +95,29 @@ def logout():
 
 
 @app.route("/artist")
-def all_artist():
-    return render_template("artist/all_artist.html")
+def all_artist_default():
+    return render_template("artist/all_artist.html", title="All artists page 0", artists = get_sample_artist(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+
+@app.route("/artist/<int:page_number>")
+def all_artist(page_number):
+    if page_number < 0:
+        page_number = 0
+
+    lower_limit = page_number * ITEMS_PER_PAGE
+    upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    
+    artists = get_sample_artist(lower_limit,upper_limit)
+
+    while len(artists) <= 0:
+        if page_number == 0:
+            break
+        else:
+            page_number -= 1
+            lower_limit = page_number * ITEMS_PER_PAGE
+            upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+            artists = get_sample_artist(lower_limit,upper_limit)
+
+    return render_template("artist/all_artist.html", title="All artists page "+str(page_number), artists = get_sample_artist(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
 
 
 from .models import Artist
@@ -103,7 +125,43 @@ from .models import Artist
 
 @app.route("/artist/one_artist/<int:id>")
 def one_artist(id):
-    return render_template("artist/one_artist.html", artist=Artist.from_id(id))
+    artist=Artist.from_id(id)
+    return render_template("artist/one_artist.html", title=artist.name, artist=artist)
+
+@app.route("/album")
+def all_album_default():
+    return render_template ("album/all_album.html", title="All albums page 0", albums = get_sample_album(0,ITEMS_PER_PAGE), page_number = 0, genders = get_sample_genre())
+
+@app.route("/album/<int:page_number>")
+def all_album(page_number):
+
+    if page_number < 0:
+        page_number = 0
+
+    lower_limit = page_number * ITEMS_PER_PAGE
+    upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    
+    albums = get_sample_album(lower_limit,upper_limit)
+
+    while len(albums) <= 0:
+        if page_number == 0:
+            break
+        else:
+            page_number -= 1
+            lower_limit = page_number * ITEMS_PER_PAGE
+            upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+            albums = get_sample_album(lower_limit,upper_limit)
+    
+    return render_template("album/all_album.html", title="All albums page "+str(page_number), albums = get_sample_album(lower_limit,upper_limit), page_number = page_number, genders = get_sample_genre())
+
+
+from .models import Album
+
+
+@app.route("/album/one_album/<int:id>")
+def one_album(id):
+    album=Album.from_id(id)
+    return render_template("album/one_album.html", title=album.title, album = album)
 
 
 from .models import Playlist, Indexation, get_albums_from_playlist, get_playlists_from_user

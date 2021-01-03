@@ -4,7 +4,7 @@
     <!-- TODO à passer en paramètres ça serait sympa -->
     {% set navigation_bar = [
     ('/artist', 'all_artist', 'Artistes'),
-    ('/albums', 'all_albums', 'Albums'),
+    ('/album', 'all_album', 'Album'),
 
     ] -%}
     {% if current_user.is_authenticated %}
@@ -29,17 +29,14 @@
 
             <ul class="navbar-nav mr-auto">
                 {% for href, id, caption in navigation_bar + navigation_bar_logged %}
-                    <li class="nav-item {% if id == active_page %}active" style="  border-bottom: 1px solid black;
-                    {% endif %}"><a class="nav-link"
+                    <li class="nav-item {% if id == active_page %} active" style="  border-bottom: 1px solid black; {% endif %} "><a class="nav-link"
                                     href="{{ href|e }}">
                         {{ caption|e }}</a>
                     </li>
                 {% endfor %}
             </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
+            {% block navbarperso %}
+            {% endblock %}
             {% if current_user.is_authenticated %}
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
