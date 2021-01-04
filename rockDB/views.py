@@ -179,25 +179,14 @@ def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
 
     if request.method == 'POST':
         form = ReseachAlbum()
-
         filter_gender = form.gender.data
-        print("filtre genre post",filter_gender)
-
         filter_type = form.tipe.data
-        print("filtre type post",filter_type)
-
         filter_value = form.value.data
-        print("filtre value post",filter_value)
 
     elif request.method == 'GET':
         filter_gender = request.args.get('filter_gender')
-        print("filtre genre get",filter_gender)
-
         filter_type = request.args.get('filter_type')
-        print("filtre type get",filter_type)
-
         filter_value = request.args.get('filter_value')
-        print("filtre value get",filter_value)
 
     # ******************************* # 
     #    sécurité sur les filtres     #
@@ -243,10 +232,6 @@ def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
-
-    print("traitement gender",filter_gender, type(filter_gender))
-    print("traitement type",filter_type)
-    print("traitement value",filter_value)
     
     return render_template("album/all_album.html",
                            title="All albums page "+str(page_number),

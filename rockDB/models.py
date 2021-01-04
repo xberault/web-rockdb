@@ -119,14 +119,10 @@ def get_sample_album_without_gender(filter_type, filter_value):
     if filter_type == "title":
         return Album.query.filter(Album.title.like('%'+filter_value+'%'))
     if filter_type == "author":
-        print()
         return Album.query.join(Artist).filter(Artist.name.like('%'+filter_value+'%'))
     if filter_type == "release":
-        print("hello")
         try:
             date = int(filter_value)
-            print("cc c moy")
-            print(Album.query.filter(Album.release == date))
             return Album.query.filter(Album.release == date)
         except:
             return Album.query.all()
