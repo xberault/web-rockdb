@@ -97,6 +97,56 @@ def logout():
     return redirect('/')
 
 # ***************************************************** #
+# ************** sécurité des saisies ***************** #
+# ***************************************************** #
+
+def secure_filter_gender(filter_gender):
+    try :
+        filter_g = int(filter_gender)
+        genders = get_sample_genre()
+        ok = False
+        for gender in genders:
+            if gender.id == filter_g:
+                ok = True
+                filter_gender = str(filter_g)
+        if not ok:
+            filter_gender = ""
+        return filter_gender
+    except:
+        filter_gender = ""
+        return filter_gender
+
+def secure_filter_type(filter_type, list_types):
+    if filter_type not in list_types:
+        filter_type = ""
+    return filter_type
+
+def secure_filter_value(filter_value):
+    """ cette fonction a pour but de prévenir d'une injection en base de données
+    par un utilisateur malvayant
+
+    cette fontione retire: les caractères spéciaux sauf espaces
+    et remplace -- par - 
+
+    Args:
+        filter_value (string): ce que l'tilisateur souhaite rechercher
+    """
+    res = ""
+    if len(filter_value) > 0:
+        car = filter_value[0]
+        for i in range(len(filter_value)):
+            if filter_value[i].isalnum():
+                res += filter_value[i]
+                car = filter_value[i]
+            else:
+                if not (car == "-" and filter_value[i] == car):
+                    if filter_value[i] == " ":
+                        res += filter_value[i]
+                        car = " "
+    return res
+
+
+# ***************************************************** #
 # ************ routes pour les artists **************** #
 # ***************************************************** #
 
@@ -128,22 +178,9 @@ def all_artist(page_number):
     #    sécurité sur les filtres     #
     # ******************************* # 
 
-    try :
-        filter_g = int(filter_gender)
-        genders = get_sample_genre()
-        ok = False
-        for gender in genders:
-            if gender.id == filter_g:
-                ok = True
-                filter_gender = str(filter_g)
-        if not ok:
-            filter_gender = ""
-    except:
-        filter_gender = ""
-
-    types = ["name"]
-    if filter_type not in types:
-        filter_type = ""
+    filter_gender = secure_filter_gender(filter_gender)
+    filter_type = secure_filter_type(filter_type,["name"])
+    filter_value = secure_filter_value(filter_value)
 
     # ******************************* # 
     # sécurité sur le nombre de pages #
@@ -216,22 +253,9 @@ def all_album(page_number):
     #    sécurité sur les filtres     #
     # ******************************* # 
 
-    try :
-        filter_g = int(filter_gender)
-        genders = get_sample_genre()
-        ok = False
-        for gender in genders:
-            if gender.id == filter_g:
-                ok = True
-                filter_gender = str(filter_g)
-        if not ok:
-            filter_gender = ""
-    except:
-        filter_gender = ""
-
-    types = ["release","title","author"]
-    if filter_type not in types:
-        filter_type = ""
+    filter_gender = secure_filter_gender(filter_gender)
+    filter_type = secure_filter_type(filter_type,["release","title","author"])
+    filter_value = secure_filter_value(filter_value)
     
     # ******************************* # 
     # sécurité sur le nombre de pages #
