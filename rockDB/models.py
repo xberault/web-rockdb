@@ -154,9 +154,65 @@ class Classification(db.Model):
         db.session.commit()
         return c
 
-# [lower_limit:upper_limit]
+# ***************************************************** #
+# ************** sécurité des saisies ***************** #
+# ***************************************************** #
+
+def secure_filter_gender(filter_gender):
+    try :
+        filter_g = int(filter_gender)
+        genders = get_sample_genre()
+        ok = False
+        for gender in genders:
+            if gender.id == filter_g:
+                ok = True
+                filter_gender = str(filter_g)
+        if not ok:
+            filter_gender = ""
+        return filter_gender
+    except:
+        filter_gender = ""
+        return filter_gender
+
+def secure_filter_type(filter_type, list_types):
+    if filter_type not in list_types:
+        filter_type = ""
+    return filter_type
+
+def secure_filter_value(filter_value):
+    """ cette fonction a pour but de prévenir d'une injection en base de données
+    par un utilisateur malvayant
+
+    cette fontione retire: les caractères spéciaux sauf espaces
+    et remplace -- par - 
+
+    Args:
+        filter_value (string): ce que l'tilisateur souhaite rechercher
+    """
+    res = ""
+    if len(filter_value) > 0:
+        car = filter_value[0]
+        for i in range(len(filter_value)):
+            if filter_value[i].isalnum():
+                res += filter_value[i]
+                car = filter_value[i]
+            else:
+                if not (car == "-" and filter_value[i] == car):
+                    if filter_value[i] == " ":
+                        res += filter_value[i]
+                        car = " "
+    return res
 
 def get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit):
+
+    # ******************************* # 
+    #    sécurité sur les filtres     #
+    # ******************************* # 
+
+    filter_gender = secure_filter_gender(filter_gender)
+    filter_type = secure_filter_type(filter_type,["release","title","author"])
+    filter_value = secure_filter_value(filter_value)
+
     sous_requette = get_sample_album_without_gender(filter_type, filter_value)
     try:
         if filter_gender != "":
@@ -179,20 +235,23 @@ def get_sample_album(filter_gender, filter_type, filter_value, lower_limit, uppe
     return sous_requette[lower_limit:upper_limit]
 
 def get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit):
+    
+    # ******************************* # 
+    #    sécurité sur les filtres     #
+    # ******************************* # 
+
+    filter_gender = secure_filter_gender(filter_gender)
+    filter_type = secure_filter_type(filter_type,["name"])
+    filter_value = secure_filter_value(filter_value)
+
     sous_requette = get_sample_artist_without_gender(filter_type, filter_value)
-    print('test')
     try:
         if filter_gender != "":
-            print("ici")
             id_genre = int(filter_gender)
             classifications = Genre.query.get(id_genre).classifications.all()
             temp = set()
-            print(classifications)
             for c in classifications:
-                
                 artist = Artist.from_id(Album.from_id(c.album_id).artist_id)
-                print("coucouc")
-                print(artist)
                 temp.add(artist.id)
 
             artists=[]
