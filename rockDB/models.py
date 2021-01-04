@@ -30,11 +30,10 @@ class Artist(db.Model):
     def from_id(cls, id):
         return Artist.query.get(id)
 
-def get_sample_artist(lower_limit = 0, upper_limit = 10):
-    return Artist.query.all()[lower_limit:upper_limit]
-
-def get_artist(id):
-    return Artist.query.get(id)
+def get_sample_artist_without_gender(filter_type, filter_value):
+    if filter_type == "name":
+        return Artist.query.filter(Artist.name.like('%'+filter_value+'%'))
+    return Artist.query.all()
 
 # **************************************************************************** #
 # ************************** gestion des genres ****************************** #
@@ -58,9 +57,10 @@ class Genre(db.Model):
 
     def __repr__(self):
         return f"<Genre ({self.id}) {self.name}>"
-
-def get_genre(id):
-    return Genre.query.get(id)
+    
+    @classmethod
+    def from_id(cls, id):
+        return Genre.query.get(id)
 
 def get_sample_genre():
     return Genre.query.distinct().order_by(Genre.name)
@@ -128,9 +128,6 @@ def get_sample_album_without_gender(filter_type, filter_value):
             return Album.query.all()
     return Album.query.all()
 
-def get_album(id):
-    return Album.query.get(id)
-
 # **************************************************************************** #
 # ******************* gestion relations albums genres ************************ #
 # **************************************************************************** #
@@ -175,6 +172,34 @@ def get_sample_album(filter_gender, filter_type, filter_value, lower_limit, uppe
                 if album.id in temp:
                     albums.append(album)
             return albums[lower_limit:upper_limit]
+        else:
+            sous_requette[lower_limit:upper_limit]
+    except:
+        sous_requette[lower_limit:upper_limit]
+    return sous_requette[lower_limit:upper_limit]
+
+def get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit):
+    sous_requette = get_sample_artist_without_gender(filter_type, filter_value)
+    print('test')
+    try:
+        if filter_gender != "":
+            print("ici")
+            id_genre = int(filter_gender)
+            classifications = Genre.query.get(id_genre).classifications.all()
+            temp = set()
+            print(classifications)
+            for c in classifications:
+                
+                artist = Artist.from_id(Album.from_id(c.album_id).artist_id)
+                print("coucouc")
+                print(artist)
+                temp.add(artist.id)
+
+            artists=[]
+            for artist in sous_requette:
+                if artist.id in temp:
+                    artists.append(artist)
+            return artists[lower_limit:upper_limit]
         else:
             sous_requette[lower_limit:upper_limit]
     except:
