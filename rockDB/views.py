@@ -102,12 +102,27 @@ def logout():
 
 from .models import Artist
 
-@app.route("/artist")
+@app.route("/artist", methods=['GET', 'POST'])
 def all_artist_default():
     return redirect('artist/0')
 
-@app.route("/artist/<int:page_number>")
-def all_artist(page_number, filter_gender="", filter_type="", filter_value=""):
+@app.route("/artist/<int:page_number>", methods=['GET', 'POST'])
+def all_artist(page_number):
+
+    # ******************************* # 
+    #    récupération des données     #
+    # ******************************* # 
+
+    if request.method == 'POST':
+        form = ReseachArtist()
+        filter_gender = form.gender.data
+        filter_type = form.tipe.data
+        filter_value = form.value.data
+
+    elif request.method == 'GET':
+        filter_gender = request.args.get('filter_gender')
+        filter_type = request.args.get('filter_type')
+        filter_value = request.args.get('filter_value')
 
     # ******************************* # 
     # sécurité sur le nombre de pages #
@@ -121,7 +136,7 @@ def all_artist(page_number, filter_gender="", filter_type="", filter_value=""):
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
     
-    artists = get_sample_artist(lower_limit,upper_limit)
+    artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
     # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
     while len(artists) <= 0:
@@ -131,29 +146,17 @@ def all_artist(page_number, filter_gender="", filter_type="", filter_value=""):
             page_number -= 1
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-            artists = get_sample_artist(lower_limit,upper_limit)
-
-    # ******************************* # 
-    #    sécurité sur les filtres     #
-    # ******************************* # 
-
-    genders = get_sample_genre()
-    if filter_gender not in genders:
-        filter_gender = ""
-
-    types = ["release","title","author"]
-    if filter_type not in types:
-        filter_type = ""
+            artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
     return render_template("artist/all_artist.html",
                            title="All artists page "+str(page_number),
                            form=ReseachArtist(),
                            dest="all_artist",
-                           artists = get_sample_artist(lower_limit,upper_limit),
+                           artists = artists,
                            page_number = page_number,
                            filter_gender = filter_gender,
                            filter_type = filter_type,
-                           filter_value = "")
+                           filter_value = filter_value)
 
 
 @app.route("/artist/one_artist/<int:id>")
@@ -171,7 +174,7 @@ def all_album_default():
     return redirect('album/0')
 
 @app.route("/album/<int:page_number>", methods=['GET', 'POST'])
-def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
+def all_album(page_number):
 
     # ******************************* # 
     #    récupération des données     #
@@ -187,27 +190,6 @@ def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
         filter_gender = request.args.get('filter_gender')
         filter_type = request.args.get('filter_type')
         filter_value = request.args.get('filter_value')
-
-    # ******************************* # 
-    #    sécurité sur les filtres     #
-    # ******************************* # 
-
-    try :
-        filter_g = int(filter_gender)
-        genders = get_sample_genre()
-        ok = False
-        for gender in genders:
-            if gender.id == filter_g:
-                ok = True
-                filter_gender = str(filter_g)
-        if not ok:
-            filter_gender = ""
-    except:
-        filter_gender = ""
-
-    types = ["release","title","author"]
-    if filter_type not in types:
-        filter_type = ""
     
     # ******************************* # 
     # sécurité sur le nombre de pages #
