@@ -115,21 +115,22 @@ class Album(db.Model):
     def from_id(cls, id):
         return Album.query.get(id)
 
-def get_sample_album(filter_gender="", filter_type="", filter_value="",lower_limit = 0, upper_limit = 10):
+def get_sample_album_without_gender(filter_type, filter_value):
     if filter_type == "title":
-        return Album.query.filter(Album.title.like('%'+filter_value+'%'))[lower_limit:upper_limit]
+        return Album.query.filter(Album.title.like('%'+filter_value+'%'))
     if filter_type == "author":
-        return Album.query.filter(Album.artist.name.like('%'+filter_value+'%'))[lower_limit:upper_limit]
+        print()
+        return Album.query.join(Artist).filter(Artist.name.like('%'+filter_value+'%'))
     if filter_type == "release":
+        print("hello")
         try:
             date = int(filter_value)
-            return Album.query.filter(Album.title.like('%'+filter_value+'%'))[lower_limit:upper_limit]
+            print("cc c moy")
+            print(Album.query.filter(Album.release == date))
+            return Album.query.filter(Album.release == date)
         except:
-            return Album.query.all()[lower_limit:upper_limit]
-    return Album.query.all()[lower_limit:upper_limit]
-
-    
-
+            return Album.query.all()
+    return Album.query.all()
 
 def get_album(id):
     return Album.query.get(id)
@@ -159,6 +160,30 @@ class Classification(db.Model):
         db.session.add(c)
         db.session.commit()
         return c
+
+# [lower_limit:upper_limit]
+
+def get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit):
+    sous_requette = get_sample_album_without_gender(filter_type, filter_value)
+    try:
+        if filter_gender != "":
+            id_genre = int(filter_gender)
+            classifications = Genre.query.get(id_genre).classifications.all()
+            temp = set()
+            for c in classifications:
+                album = Album.from_id(c.album_id)
+                temp.add(album.id)
+
+            albums=[]
+            for album in sous_requette:
+                if album.id in temp:
+                    albums.append(album)
+            return albums[lower_limit:upper_limit]
+        else:
+            sous_requette[lower_limit:upper_limit]
+    except:
+        sous_requette[lower_limit:upper_limit]
+    return sous_requette[lower_limit:upper_limit]
 
 # **************************************************************************** #
 # ************************ gestion des playlists ***************************** #

@@ -13,6 +13,9 @@ def home():
         title="RockDB"
     )
 
+# ***************************************************** #
+# *********** routes pour les connexions ************** #
+# ***************************************************** #
 
 @login_required
 @app.route("/dashboard")
@@ -167,8 +170,55 @@ def one_artist(id):
 def all_album_default():
     return redirect('album/0')
 
-@app.route("/album/<int:page_number>")
+@app.route("/album/<int:page_number>", methods=['GET', 'POST'])
 def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
+
+    # ******************************* # 
+    #    récupération des données     #
+    # ******************************* # 
+
+    if request.method == 'POST':
+        form = ReseachAlbum()
+
+        filter_gender = form.gender.data
+        print("filtre genre post",filter_gender)
+
+        filter_type = form.tipe.data
+        print("filtre type post",filter_type)
+
+        filter_value = form.value.data
+        print("filtre value post",filter_value)
+
+    elif request.method == 'GET':
+        filter_gender = request.args.get('filter_gender')
+        print("filtre genre get",filter_gender)
+
+        filter_type = request.args.get('filter_type')
+        print("filtre type get",filter_type)
+
+        filter_value = request.args.get('filter_value')
+        print("filtre value get",filter_value)
+
+    # ******************************* # 
+    #    sécurité sur les filtres     #
+    # ******************************* # 
+
+    try :
+        filter_g = int(filter_gender)
+        genders = get_sample_genre()
+        ok = False
+        for gender in genders:
+            if gender.id == filter_g:
+                ok = True
+                filter_gender = str(filter_g)
+        if not ok:
+            filter_gender = ""
+    except:
+        filter_gender = ""
+
+    types = ["release","title","author"]
+    if filter_type not in types:
+        filter_type = ""
     
     # ******************************* # 
     # sécurité sur le nombre de pages #
@@ -182,7 +232,7 @@ def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
     
-    albums = get_sample_album(lower_limit,upper_limit)
+    albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
     # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
     while len(albums) <= 0:
@@ -192,39 +242,33 @@ def all_album(page_number, filter_gender="", filter_type="", filter_value=""):
             page_number -= 1
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-            albums = get_sample_album(lower_limit,upper_limit)
+            albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
-    # ******************************* # 
-    #    sécurité sur les filtres     #
-    # ******************************* # 
-
-    genders = get_sample_genre()
-    if filter_gender not in genders:
-        filter_gender = ""
-
-    types = ["release","title","author"]
-    if filter_type not in types:
-        filter_type = ""
+    print("traitement gender",filter_gender, type(filter_gender))
+    print("traitement type",filter_type)
+    print("traitement value",filter_value)
     
     return render_template("album/all_album.html",
                            title="All albums page "+str(page_number),
                            form=ReseachAlbum(),
                            dest="all_album",
-                           albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit),
+                           albums = albums,
                            page_number = page_number,
                            filter_gender = filter_gender,
                            filter_type = filter_type,
-                           filter_value = "")
+                           filter_value = filter_value)
 
 
 from .models import Album
-
 
 @app.route("/album/one_album/<int:id>")
 def one_album(id):
     album=Album.from_id(id)
     return render_template("album/one_album.html", title=album.title, album = album)
 
+# ***************************************************** #
+# *********** routes pour les playlists *************** #
+# ***************************************************** #
 
 from .models import Playlist, Indexation, get_albums_from_playlist, get_playlists_from_user
 
