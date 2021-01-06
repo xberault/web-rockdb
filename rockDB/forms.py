@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
-from .models import get_sample_genre
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField
+from .models import get_sample_genre, get_all_artist
 from wtforms.validators import (DataRequired,
                                 Email,
                                 EqualTo,
@@ -28,18 +28,25 @@ class LoginForm(FlaskForm):
 
 class ReseachAlbum(FlaskForm):
     """  """
-    temp = [(g.id,g.name) for g in get_sample_genre()]
-    temp.insert(0,('all','all'))
-    gender = SelectField('Gender',choices=temp)
+    gender = SelectField('Gender')
     tipe = SelectField ('By', choices=[('title','Title'),('author','Author'),('release','Released in')])
     value = StringField('value')
     submit = SubmitField('Search')
 
 class ReseachArtist(FlaskForm):
     """  """
-    temp = [(g.id,g.name) for g in get_sample_genre()]
-    temp.insert(0,('all','all'))
-    gender = SelectField('Gender',choices=temp)
+    gender = SelectField('Gender')
     tipe = SelectField ('By', choices=[('name','Name')])
     value = StringField('value')
     submit = SubmitField('Search')
+
+class EditAlbum(FlaskForm):
+    title = StringField("title")
+    release = DateField("Released in",format='%Y')
+    img = StringField("Image")
+    parent = StringField("Parent")
+
+    # temp = [(g.id,g.name) for g in get_all_artist()]
+    # temp.insert(0,('new','New'))
+    artist = SelectField("artist",choices=[])
+    submit = SubmitField('Sauvegarder')
