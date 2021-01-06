@@ -109,9 +109,9 @@ def all_artist_default():
 @app.route("/artist/<int:page_number>", methods=['GET', 'POST'])
 def all_artist(page_number):
 
-    # ******************************* # 
+    # ******************************* #
     #    récupération des données     #
-    # ******************************* # 
+    # ******************************* #
 
     if request.method == 'POST':
         form = ReseachArtist()
@@ -124,18 +124,18 @@ def all_artist(page_number):
         filter_type = request.args.get('filter_type')
         filter_value = request.args.get('filter_value')
 
-    # ******************************* # 
+    # ******************************* #
     # sécurité sur le nombre de pages #
     # ******************************* #
 
-    # pour ne pas aller a la page -1 (ne préviens d'une saisie directe dans l'url) 
+    # pour ne pas aller a la page -1 (ne préviens d'une saisie directe dans l'url)
     if page_number < 0:
         page_number = 0
 
     # pour ne pas afficher une page vierge
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-    
+
     artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
     # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
@@ -181,7 +181,11 @@ def all_artist(page_number):
 @app.route("/artist/one_artist/<int:id>")
 def one_artist(id):
     artist=Artist.from_id(id)
-    return render_template("artist/one_artist.html", title=artist.name, artist=artist)
+    return render_template(
+        "artist/one_artist.html",
+        title=artist.name,
+        artist=artist
+    )
 
 
 # ***************************************************** #
@@ -195,9 +199,9 @@ def all_album_default():
 @app.route("/album/<int:page_number>", methods=['GET', 'POST'])
 def all_album(page_number):
 
-    # ******************************* # 
+    # ******************************* #
     #    récupération des données     #
-    # ******************************* # 
+    # ******************************* #
 
     if request.method == 'POST':
         form = ReseachAlbum()
@@ -209,19 +213,19 @@ def all_album(page_number):
         filter_gender = request.args.get('filter_gender')
         filter_type = request.args.get('filter_type')
         filter_value = request.args.get('filter_value')
-    
-    # ******************************* # 
-    # sécurité sur le nombre de pages #
-    # ******************************* # 
 
-    # pour ne pas aller a la page -1 (ne préviens d'une saisie directe dans l'url) 
+    # ******************************* #
+    # sécurité sur le nombre de pages #
+    # ******************************* #
+
+    # pour ne pas aller a la page -1 (ne préviens d'une saisie directe dans l'url)
     if page_number < 0:
         page_number = 0
 
     # pour ne pas afficher une page vierge
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-    
+
     albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
     # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
@@ -249,7 +253,7 @@ def all_album(page_number):
     if filter_value != None and filter_value != "":
         form.value.default = filter_value
     form.process()
-    
+
     return render_template("album/all_album.html",
                            title = "All albums page "+str(page_number),
                            form = form,
@@ -266,7 +270,11 @@ from .models import Album
 @app.route("/album/one_album/<int:id>")
 def one_album(id):
     album=Album.from_id(id)
-    return render_template("album/one_album.html", title=album.title, album = album)
+    return render_template(
+        "album/one_album.html",
+        title=album.title,
+        album = album
+    )
 
 # @login_required
 @app.route("/album/edit_and_suppr/<int:id>")
@@ -293,17 +301,23 @@ def delete_album(id):
 from .models import Playlist, Indexation, get_albums_from_playlist, get_playlists_from_user
 
 @login_required
-@app.route("/playlists/<int:user_id>")
+@app.route("/playlist/<string:user_id>")
 def playlists(user_id):
+    playlists = dict()
+    for pl in get_playlists_from_user(user_id):
+        playlists[pl] = get_albums_from_playlist(pl.id)
+
     return render_template(
-        "playlists.html",
-        playlists=get_playlists_from_user(user_id)
+        "playlist/playlist.html",
+        title="Playlists de "+user_id,
+        playlists=playlists
     )
 
-@app.route("/playlist/<int:id>")
-def playlist(id):
+@app.route("/one_playlist/<int:id>")
+def one_playlist(id):
     return render_template(
-        "playlist.html",
+        "playlist/one_playlist.html",
+        title="Playlist n°"+str(id),
         playlist=Playlist.from_id(id),
         albums=get_albums_from_playlist(id)
     )
