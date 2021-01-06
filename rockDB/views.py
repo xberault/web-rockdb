@@ -1,5 +1,5 @@
 from .app import app
-from .forms import LoginForm, SignupForm, ReseachAlbum, ReseachArtist
+from .forms import LoginForm, SignupForm, ReseachAlbum, ReseachArtist, EditAlbum
 from .models import User, get_sample_artist, get_sample_album, get_sample_genre
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
@@ -148,10 +148,29 @@ def all_artist(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
+    # envoie  de la liste des genre au formulaire
+    temp = [(g.id,g.name) for g in get_sample_genre()]
+    temp.insert(0,('all','all'))
+    form=ReseachAlbum()
+    form.gender.choices=temp
+
+    # code pour que la nav bar garde les infos d'une page à l'autre
+    try:
+        form.gender.default = int(filter_gender)
+    except:
+        pass
+    try:
+        form.tipe.default = filter_type
+    except:
+        pass
+    if filter_value != None and filter_value != "":
+        form.value.default = filter_value
+    form.process()
+
     return render_template("artist/all_artist.html",
-                           title="All artists page "+str(page_number),
-                           form=ReseachArtist(),
-                           dest="all_artist",
+                           title = "All artists page "+str(page_number),
+                           form = form,
+                           dest = "all_artist",
                            artists = artists,
                            page_number = page_number,
                            filter_gender = filter_gender,
@@ -214,11 +233,27 @@ def all_album(page_number):
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
+
+    temp = [(g.id,g.name) for g in get_sample_genre()]
+    temp.insert(0,('all','all'))
+    form=ReseachAlbum()
+    form.gender.choices=temp
+    try:
+        form.gender.default = int(filter_gender)
+    except:
+        pass
+    try:
+        form.tipe.default = filter_type
+    except:
+        pass
+    if filter_value != None and filter_value != "":
+        form.value.default = filter_value
+    form.process()
     
     return render_template("album/all_album.html",
-                           title="All albums page "+str(page_number),
-                           form=ReseachAlbum(),
-                           dest="all_album",
+                           title = "All albums page "+str(page_number),
+                           form = form,
+                           dest = "all_album",
                            albums = albums,
                            page_number = page_number,
                            filter_gender = filter_gender,
@@ -232,6 +267,24 @@ from .models import Album
 def one_album(id):
     album=Album.from_id(id)
     return render_template("album/one_album.html", title=album.title, album = album)
+
+# @login_required
+@app.route("/album/edit_and_suppr/<int:id>")
+def edit_and_suppr_album(id):
+    album=Album.from_id(id)
+    test = EditAlbum()
+    return render_template("album/edit_and_suppr_album.html",
+                           title=album.title,
+                           form = test,
+                           artist= Artist.from_id(album.artist_id),
+                           album = album)
+
+# @login_required
+@app.route("/album/delete/<int:id>")
+def delete_album(id):
+    Album.delete(id)
+    return redirect('/album/0')
+
 
 # ***************************************************** #
 # *********** routes pour les playlists *************** #

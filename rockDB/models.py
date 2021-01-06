@@ -30,6 +30,9 @@ class Artist(db.Model):
     def from_id(cls, id):
         return Artist.query.get(id)
 
+def get_all_artist():
+    return Artist.query.all()
+
 def get_sample_artist_without_gender(filter_type, filter_value):
     if filter_type == "name":
         return Artist.query.filter(Artist.name.like('%'+filter_value+'%'))
@@ -61,6 +64,13 @@ class Genre(db.Model):
     @classmethod
     def from_id(cls, id):
         return Genre.query.get(id)
+
+    @classmethod
+    def delete_if_no_relation(cls, id):
+        classifications = Genre.query.get(id).classifications.all()
+        if len(classifications) == 0:
+            db.session.delete(Genre.query.get(id))
+            db.session.commit()
 
 def get_sample_genre():
     return Genre.query.distinct().order_by(Genre.name)
@@ -115,6 +125,24 @@ class Album(db.Model):
     def from_id(cls, id):
         return Album.query.get(id)
 
+    @classmethod
+    def delete(cls, album_id):
+
+        # suppression des relasions pour les genres
+        classifications = Album.query.get(album_id).classifications.all()
+        for c in classifications:
+            genre_id = c.genre_id
+            db.session.delete(c)
+            db.session.commit()
+            Genre.delete_if_no_relation(genre_id)
+
+        db.session.delete(Album.from_id(album_id))
+        db.session.commit()
+    
+    @classmethod
+    def edit(cls, album_id):
+        pass
+
 def get_sample_album_without_gender(filter_type, filter_value):
     if filter_type == "title":
         return Album.query.filter(Album.title.like('%'+filter_value+'%'))
@@ -153,6 +181,10 @@ class Classification(db.Model):
         db.session.add(c)
         db.session.commit()
         return c
+    
+    @classmethod
+    def delete(cls, album_id, genre_id):
+        db.session.delete(Classification.get(album_id, genre_id))
 
 # ***************************************************** #
 # ************** sécurité des saisies ***************** #
@@ -189,6 +221,8 @@ def secure_filter_value(filter_value):
     Args:
         filter_value (string): ce que l'tilisateur souhaite rechercher
     """
+    if filter_value == None:
+        filter_value = ""
     res = ""
     if len(filter_value) > 0:
         car = filter_value[0]
@@ -216,8 +250,8 @@ def get_sample_album(filter_gender, filter_type, filter_value, lower_limit, uppe
     sous_requette = get_sample_album_without_gender(filter_type, filter_value)
     try:
         if filter_gender != "":
-            id_genre = int(filter_gender)
-            classifications = Genre.query.get(id_genre).classifications.all()
+            genre_id = int(filter_gender)
+            classifications = Genre.query.get(genre_id).classifications.all()
             temp = set()
             for c in classifications:
                 album = Album.from_id(c.album_id)
@@ -235,7 +269,7 @@ def get_sample_album(filter_gender, filter_type, filter_value, lower_limit, uppe
     return sous_requette[lower_limit:upper_limit]
 
 def get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit):
-    
+
     # ******************************* # 
     #    sécurité sur les filtres     #
     # ******************************* # 
@@ -247,8 +281,8 @@ def get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upp
     sous_requette = get_sample_artist_without_gender(filter_type, filter_value)
     try:
         if filter_gender != "":
-            id_genre = int(filter_gender)
-            classifications = Genre.query.get(id_genre).classifications.all()
+            genre_id = int(filter_gender)
+            classifications = Genre.query.get(genre_id).classifications.all()
             temp = set()
             for c in classifications:
                 artist = Artist.from_id(Album.from_id(c.album_id).artist_id)
