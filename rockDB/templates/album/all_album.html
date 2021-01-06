@@ -2,38 +2,7 @@
 {% set active_page = "all_album" %}
 
 {% block navbarperso %}
-<form class="form-inline my-2 my-lg-0">
-  <div class="form-row align-items-center">
-    <div class="col-auto my-1">
-      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-    </div>
-    <div class="col-auto my-1">
-        <label for="genre" class="my-2 my-lg-0">by</label>
-    </div>
-    <div class="col-auto my-1">
-      <select name="genre" id="genre" class="custom-select my-2 my-lg-0" required>
-        <option selected>Choose ...</option>
-        <option value="realse">Realesed in</option>
-        <option value="title">Title</option>
-        <option value="author">Author</option>
-      </select>
-    </div>
-    <div class="col-auto my-1">
-      <label for="genre" class="my-2 my-lg-0">Gender</label>
-    </div>
-    <div class="col-auto my-1">
-      <select name="genre" id="genre" class="custom-select my-2 my-lg-0">
-          <option selected>Choose ...</option>
-          {% for gender in genders %}
-          <option value="{{ gender.id }}">{{ gender.name }}</option>
-          {% endfor %}
-      </select>
-    </div>
-    <div class="col-auto my-1">
-      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-    </div>
-  </div>
-</form>
+{% include 'includes/navbarsearch.html' %}
 {% endblock %}
 
 {% block main %}
@@ -48,8 +17,8 @@
 </div>
 <div class="btn-group">
   {% if page_number > 0 %}
-  <a href="{{ url_for('all_album',page_number = page_number-1)}}" class="btn btn-sm btn-outline-secondary">Page prec</a>
+  <a href="{{ url_for('all_album', page_number = page_number-1, filter_gender=filter_gender, filter_type=filter_type, filter_value=filter_value)}}" class="btn btn-sm btn-outline-secondary">Page prec</a>
   {% endif %}
-  <a href="{{ url_for('all_album',page_number = page_number+1)}}" class="btn btn-sm btn-outline-secondary">Page suiv</a>
+  <a href="{{ url_for('all_album', page_number = page_number+1, filter_gender=filter_gender, filter_type=filter_type, filter_value=filter_value)}}" class="btn btn-sm btn-outline-secondary">Page suiv</a>
 </div>
 {% endblock %}
