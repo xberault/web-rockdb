@@ -19,14 +19,14 @@ def loaddb(filename):
         if ar not in artists:
             o = Artist(name=ar)
             db.session.add(o)
-            # o = Artist.create(name=ar) (en fait non)
             artists[ar] = o
-        # p = al["parent"]
-        # if p not in artists:
-        #     o = Artist(name=p)
-        #     db.session.add(o)
-        #     artists[ar] = o
+        p = al["parent"]
+        if p not in artists:
+            o = Artist(name=p)
+            db.session.add(o)
+            artists[ar] = o
     db.session.commit()
+    print(artists)
 
     # creation des genres
     genres = {}
@@ -42,14 +42,15 @@ def loaddb(filename):
     # creation des livres
     for al in albums:
         ar = artists[al["by"]]
-        # p = artists[al["parent"]]
+        p = artists[al["parent"]]
+        print(al["parent"])
         o = Album(
             title=al["title"],
             release=al["releaseYear"],
             img=al["img"],
             artist_id=ar.id,
-            # parent_id=p.id
-            parent=al["parent"]
+            parent_id=p.id
+            # parent=al["parent"]
         )
         db.session.add(o)
     db.session.commit()

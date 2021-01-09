@@ -84,20 +84,22 @@ class Album(db.Model):
     title = db.Column(db.String(100))
     release = db.Column(db.Integer)
     img = db.Column(db.String(100))
-    parent = db.Column(db.String(100))
+    # parent = db.Column(db.String(100))
 
-    # parent_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
-    # parent = db.relationship(
-    #     "Artist",
-    #     backref=db.backref("albums", lazy="dynamic"))
+    parent_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
+    parent = db.relationship(
+        "Artist",
+        backref=db.backref("rights", lazy="dynamic"),
+        foreign_keys=[parent_id])
 
     artist_id = db.Column(db.Integer, db.ForeignKey("artist.id"))
     artist = db.relationship(
         "Artist",
-        backref=db.backref("albums", lazy="dynamic"))
+        backref=db.backref("albums", lazy="dynamic"),
+        foreign_keys=[artist_id])
 
     @classmethod
-    def create_and_add(cls, title, release, img, artist_id, parent):
+    def create_and_add(cls, title, release, img, artist_id, parent_id):
         """
         ajoute un album à la bd
         :param title:
@@ -112,7 +114,7 @@ class Album(db.Model):
             release=release,
             img=img,
             artist_id=artist_id,
-            parent=parent
+            parent_id=parent_id
         )
         db.session.add(a)
         db.session.commit()
