@@ -2,5 +2,6 @@
 {% set active_page = "one_album" %}
 
 {% block main %}
-{% include "album/includes/album.html" %}
+    <button class="m-2 btn btn-secondary" onclick="history.go(-1)">Retour</button>
+    {% include "album/includes/album.html" %}
 {% endblock %}
