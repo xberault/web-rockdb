@@ -31,7 +31,7 @@ class Artist(db.Model):
         return Artist.query.get(id)
 
 def get_all_artist():
-    return Artist.query.all()
+    return Artist.query.order_by(Artist.name).all()
 
 def get_sample_artist_without_gender(filter_type, filter_value):
     if filter_type == "name":
@@ -128,14 +128,35 @@ class Album(db.Model):
         return Album.query.get(id)
 
     @classmethod
+    def get_genres(cls, album_id):
+        res = []
+        classifications = Album.query.get(album_id).classifications.all()
+        for c in classifications:
+            genre = Genre.from_id(c.genre_id) 
+            res.append((genre.id,genre.name))
+        return res
+
+    @classmethod
+    def get_genres_id(cls, album_id):
+        genders = Album.get_genres(album_id)
+        res = []
+        for g in genders:
+            res.append(g[0])
+        return res
+
+    @classmethod
     def delete(cls, album_id):
 
         # suppression des relasions pour les genres
         classifications = Album.query.get(album_id).classifications.all()
+        genres = set()
         for c in classifications:
             genre_id = c.genre_id
+            genres.add(genre_id)
             db.session.delete(c)
             db.session.commit()
+        
+        for genre_id in genres:
             Genre.delete_if_no_relation(genre_id)
 
         db.session.delete(Album.from_id(album_id))

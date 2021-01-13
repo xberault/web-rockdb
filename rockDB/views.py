@@ -1,8 +1,9 @@
 from .app import app
-from .forms import LoginForm, SignupForm, ReseachAlbum, ReseachArtist, EditAlbum
-from .models import User, get_sample_artist, get_sample_album, get_sample_genre
+from .forms import LoginForm, SignupForm, Reseach, EditAlbum
+from .models import User, get_sample_artist, get_sample_album, get_sample_genre, get_all_artist
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
+import datetime
 
 ITEMS_PER_PAGE = 8
 
@@ -114,7 +115,7 @@ def all_artist(page_number):
     # ******************************* #
 
     if request.method == 'POST':
-        form = ReseachArtist()
+        form = Reseach()
         filter_gender = form.gender.data
         filter_type = form.tipe.data
         filter_value = form.value.data
@@ -148,10 +149,11 @@ def all_artist(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
+    form=Reseach()
+
     # envoie  de la liste des genre au formulaire
     temp = [(g.id,g.name) for g in get_sample_genre()]
     temp.insert(0,('all','all'))
-    form=ReseachAlbum()
     form.gender.choices=temp
 
     # code pour que la nav bar garde les infos d'une page à l'autre
@@ -165,6 +167,8 @@ def all_artist(page_number):
         pass
     if filter_value != None and filter_value != "":
         form.value.default = filter_value
+    
+    form.tipe.choices = [('name','Name')]
     form.process()
 
     return render_template("artist/all_artist.html",
@@ -204,7 +208,7 @@ def all_album(page_number):
     # ******************************* #
 
     if request.method == 'POST':
-        form = ReseachAlbum()
+        form = Reseach()
         filter_gender = form.gender.data
         filter_type = form.tipe.data
         filter_value = form.value.data
@@ -238,10 +242,12 @@ def all_album(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
+    form=Reseach()
+
     temp = [(g.id,g.name) for g in get_sample_genre()]
     temp.insert(0,('all','all'))
-    form=ReseachAlbum()
     form.gender.choices=temp
+
     try:
         form.gender.default = int(filter_gender)
     except:
@@ -252,6 +258,8 @@ def all_album(page_number):
         pass
     if filter_value != None and filter_value != "":
         form.value.default = filter_value
+
+    form.tipe.choices = [('title','Title'),('author','Author'),('release','Released in')]
     form.process()
 
     return render_template("album/all_album.html",
@@ -267,7 +275,7 @@ def all_album(page_number):
 
 from .models import Album
 
-@app.route("/album/one_album/<int:id>")
+@app.route("/album/one-album-<int:id>", methods=['GET', 'POST'])
 def one_album(id):
     album=Album.from_id(id)
     return render_template(
@@ -277,15 +285,40 @@ def one_album(id):
     )
 
 # @login_required
-@app.route("/album/edit_and_suppr/<int:id>")
+@app.route("/album/edit/<int:id>")
 def edit_and_suppr_album(id):
-    album=Album.from_id(id)
-    test = EditAlbum()
-    return render_template("album/edit_and_suppr_album.html",
-                           title=album.title,
-                           form = test,
-                           artist= Artist.from_id(album.artist_id),
-                           album = album)
+    get_flashed_messages()
+    form = EditAlbum()
+
+    if request.method == 'GET':
+        album=Album.from_id(id)
+
+        temp = [(art.id,art.name) for art in get_all_artist()]
+        temp.insert(0,('new','new'))
+        form.artist.choices = temp
+        form.parent.choices = temp
+
+        genders = [(g.id,g.name) for g in get_sample_genre()]
+        genders.insert(0,('new','new'))
+        form.genders.choices = genders
+
+        # Préremplissage des champs
+        form.title.default = album.title
+        form.parent.default = int(album.parent.id)
+        form.artist.default = int(album.artist.id)
+        form.release.default = datetime.date(album.release,1,1)
+        form.img.default = album.img
+
+        
+        form.genders.default = Album.get_genres_id(album.id)
+
+        form.process()
+
+        return render_template("album/add_edit_suppr_album.html",
+                            title = album.title,
+                            form = form,
+                            size=len(genders),
+                            album = album)
 
 # @login_required
 @app.route("/album/delete/<int:id>")
