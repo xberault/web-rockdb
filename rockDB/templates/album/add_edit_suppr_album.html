@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% set active_page = "edit_album" %}
+
+{% block main %}
+<form role="form" method="POST" , action="{{ url_for('edit_and_suppr_album',id=album.id) }}" class="form-signin col-md-6 col-sm-12">
+    <div class="form-group ">
+        <label for="" class="col-sm-2 control-label">
+            {{ form.title.label }}
+        </label>
+        <div class="col-sm-10">
+            {{ form.title(placeholder = "Title",type="text", class_="form-control", required="True") }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="" class="col-sm-2 control-label">
+            {{ form.img.label }}
+        </label>
+        <div class="col-sm-10">
+            {{ form.img(placeholder = "URL for the image",class_="form-control", required="True") }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="" class="col-sm-2 control-label">
+            {{ form.parent.label }}
+        </label>
+        <div class="col-sm-10">
+            {{ form.parent(placeholder = "Parent",class_="form-control", required="True") }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="" class="col-sm-2 control-label">
+            {{ form.artist.label }}
+        </label>
+        <div class="col-sm-10">
+            {{ form.artist(placeholder = "Parent",class_="form-control", required="True") }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="" class="col-sm-2 control-label">
+            {{ form.release.label }}
+        </label>
+        <div class="col-sm-10">
+            {{ form.release(placeholder = "Release in",class_="form-control", required="True") }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="" class="col-sm-2 control-label">
+            {{ form.genders.label }}
+        </label>
+        <div class="col-sm-10">
+            {{ form.genders(class_="form-control", size=size, required="True") }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset col-sm-10">
+            {{ form.submit(class_="btn btn-black") }}
+            <a type="submit" class="btn btn-secondary" href="{{ url_for('delete_album',id=album.id) }}">Supprimer</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

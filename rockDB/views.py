@@ -285,13 +285,50 @@ def one_album(id):
     )
 
 # @login_required
-@app.route("/album/edit/<int:id>")
+@app.route("/album/edit/<int:id>", methods=['GET', 'POST'])
 def edit_and_suppr_album(id):
     get_flashed_messages()
     form = EditAlbum()
+    album=Album.from_id(id)
+
+    if request.method == "POST":
+
+        title = form.title.data
+        if album.title != title:
+            existing_album = Album.album_from_name(title) != None
+            if existing_album:
+                flash('Cet album existe déjà', 'warning')
+                return redirect('/album/edit/'+str(id))
+            else:
+                album.set_title(title)
+
+        img = form.img.data
+        if album.img != img:
+            album.set_img(img)
+        
+        artist_id = form.artist.data
+        if album.artist_id != artist_id:
+            if artist_id != "new":
+                album.set_artist_id(artist_id)
+        
+        parent_id = form.parent.data
+        if album.parent_id != parent_id:
+            if parent_id != "new":
+                album.set_parent_id(parent_id)
+
+        release = form.release.data.year
+        if album.release != release:
+            album.set_release(release)
+        
+        genders = form.genders.data
+        print(genders)
+
+        # u = User.register(form.name.data, form.password.data)
+        # login_user(u)
+        flash("Les modifications ont été validées", "success")
+        return redirect(url_for('one_album',id=album.id))
 
     if request.method == 'GET':
-        album=Album.from_id(id)
 
         temp = [(art.id,art.name) for art in get_all_artist()]
         temp.insert(0,('new','new'))
@@ -309,8 +346,7 @@ def edit_and_suppr_album(id):
         form.release.default = datetime.date(album.release,1,1)
         form.img.default = album.img
 
-        
-        form.genders.default = Album.get_genres_id(album.id)
+        form.genders.default = album.get_genres_id()
 
         form.process()
 
@@ -319,6 +355,8 @@ def edit_and_suppr_album(id):
                             form = form,
                             size=len(genders),
                             album = album)
+    flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
+    return redirect('/')
 
 # @login_required
 @app.route("/album/delete/<int:id>")

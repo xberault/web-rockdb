@@ -98,6 +98,7 @@ class Album(db.Model):
         backref=db.backref("albums", lazy="dynamic"),
         foreign_keys=[artist_id])
 
+    # ********** cration et ajout d'un album dans la bd ********** #
     @classmethod
     def create_and_add(cls, title, release, img, artist_id, parent_id):
         """
@@ -120,29 +121,31 @@ class Album(db.Model):
         db.session.commit()
         return a
 
-    def __repr__(self):
-        return f"<Album ({self.id}) {self.title}>"
+    # ********** modifications des attributs d'un album ********** #
+
+    def set_title(self, title):
+        self.title = title
+        db.session.commit()
     
-    @classmethod
-    def from_id(cls, id):
-        return Album.query.get(id)
+    def set_release(self, release):
+        self.release = release
+        db.session.commit()
 
-    @classmethod
-    def get_genres(cls, album_id):
-        res = []
-        classifications = Album.query.get(album_id).classifications.all()
-        for c in classifications:
-            genre = Genre.from_id(c.genre_id) 
-            res.append((genre.id,genre.name))
-        return res
+    def set_img(self, img):
+        self.img = img
+        db.session.commit()
 
-    @classmethod
-    def get_genres_id(cls, album_id):
-        genders = Album.get_genres(album_id)
-        res = []
-        for g in genders:
-            res.append(g[0])
-        return res
+    def set_artist_id(self, artist_id):
+        self.artist_id = artist_id
+        db.session.commit()
+    
+    def set_parent_id(self, parent_id):
+        self.release = parent_id
+        db.session.commit()
+    
+    def set_genres(self, release):
+        pass
+
 
     @classmethod
     def delete(cls, album_id):
@@ -162,9 +165,33 @@ class Album(db.Model):
         db.session.delete(Album.from_id(album_id))
         db.session.commit()
     
+    # ********** recupperation des albums ********** #
+    
     @classmethod
-    def edit(cls, album_id):
-        pass
+    def from_id(cls, id):
+        return Album.query.get(id)
+
+    @classmethod
+    def album_from_name(cls,name):
+        return Album.query.filter(Album.name.like(name))
+
+    def get_genres(self):
+        res = []
+        classifications = Album.query.get(self.id).classifications.all()
+        for c in classifications:
+            genre = Genre.from_id(c.genre_id) 
+            res.append((genre.id,genre.name))
+        return res
+
+    def get_genres_id(self):
+        genders = Album.get_genres(self)
+        res = []
+        for g in genders:
+            res.append(g[0])
+        return res
+
+    def __repr__(self):
+        return f"<Album ({self.id}) {self.title}>"
 
 def get_sample_album_without_gender(filter_type, filter_value):
     if filter_type == "title":

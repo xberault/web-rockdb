@@ -5,7 +5,9 @@ from wtforms.validators import (DataRequired,
                                 Email,
                                 EqualTo,
                                 Length,
-                                Optional)
+                                Optional,
+                                InputRequired,
+                                URL)
 
 
 class SignupForm(FlaskForm):
@@ -34,10 +36,10 @@ class Reseach(FlaskForm):
     submit = SubmitField('Search')
 
 class EditAlbum(FlaskForm):
-    title = StringField("Title")
-    release = DateField("Released_in",format='%Y')
-    img = StringField("Image")
-    parent = SelectField("Parent",choices=[])
-    artist = SelectField("Artist",choices=[])
-    genders = SelectMultipleField("Genders",choices=[])
+    title = StringField("Title", validators=[Optional()])
+    release = DateField("Released_in",format='%Y', validators=[Optional()])
+    img = StringField("Image", validators=[Optional()])
+    parent = SelectField("Parent",choices=[], validators=[Optional()])
+    artist = SelectField("Artist",choices=[], validators=[Optional()])
+    genders = SelectMultipleField("Genders",choices=[], validators=[Optional()])
     submit = SubmitField('Sauvegarder')
