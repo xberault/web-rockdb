@@ -1,6 +1,6 @@
 from .app import app
 from .forms import LoginForm, SignupForm, Reseach, EditAlbum
-from .models import User, get_sample_artist, get_sample_album, get_sample_genre, get_all_artist
+from .models import User, Classification, get_sample_artist, get_sample_album, get_sample_genre, get_all_artist
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
 import datetime
@@ -295,9 +295,9 @@ def edit_and_suppr_album(id):
 
         title = form.title.data
         if album.title != title:
-            existing_album = Album.album_from_name(title) != None
+            existing_album = Album.album_from_title(title) != None
             if existing_album:
-                flash('Cet album existe déjà', 'warning')
+                flash("l'album : "+title+" existe déjà", 'warning')
                 return redirect('/album/edit/'+str(id))
             else:
                 album.set_title(title)
@@ -310,21 +310,40 @@ def edit_and_suppr_album(id):
         if album.artist_id != artist_id:
             if artist_id != "new":
                 album.set_artist_id(artist_id)
+            else:
+                flash("'ajout d'un nouvel artist depuis un album sera implémenté plus tard", 'warning')
         
         parent_id = form.parent.data
         if album.parent_id != parent_id:
             if parent_id != "new":
                 album.set_parent_id(parent_id)
+            else:
+                flash("L'ajout d'un nouveau parent depuis un album sera implémenté plus tard", 'warning')
 
         release = form.release.data.year
         if album.release != release:
             album.set_release(release)
         
-        genders = form.genders.data
-        print(genders)
+        genders_form = form.genders.data
+        genders_album = album.get_genres_id()
+        print('liste via form', genders_form)
+        print('liste via album', genders_album)
+        if genders_album != genders_form:
+            for gender_id in genders_form:
+                gender_id = int(gender_id)
+                if gender_id not in genders_album:
+                    print("possible ajout de", gender_id)
+                    if gender_id != "new":
+                        Classification.create_and_add(album.id, gender_id)
+                    else:
+                        flash("L'ajout d'un nouveau genre depuis un album sera implémenté plus tard", 'warning')
+            
+            # si l'utilisateur supprime des genres 
+            for gender_id in genders_album:
+                temp = str(gender_id)
+                if temp not in genders_form:
+                    Classification.delete(album.id,gender_id)
 
-        # u = User.register(form.name.data, form.password.data)
-        # login_user(u)
         flash("Les modifications ont été validées", "success")
         return redirect(url_for('one_album',id=album.id))
 
@@ -353,10 +372,37 @@ def edit_and_suppr_album(id):
         return render_template("album/add_edit_suppr_album.html",
                             title = album.title,
                             form = form,
-                            size=len(genders),
+                            dest = "edit_and_suppr_album",
+                            size = len(genders),
                             album = album)
     flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
     return redirect('/')
+
+# @login_required
+@app.route("/album/add-album")
+def add_album():
+    get_flashed_messages()
+    form = EditAlbum()
+
+    if request.method == "POST":
+        pass
+
+    if request.method == "GET":
+        temp = [(art.id,art.name) for art in get_all_artist()]
+        temp.insert(0,('new','new'))
+        form.artist.choices = temp
+        form.parent.choices = temp
+
+        genders = [(g.id,g.name) for g in get_sample_genre()]
+        genders.insert(0,('new','new'))
+        form.genders.choices = genders
+
+        return render_template("album/add_edit_suppr_album.html",
+                                title = "Add Album",
+                                form = form,
+                                dest = "add_album",
+                                size = len(genders),
+                                album = Album.from_id(1))
 
 # @login_required
 @app.route("/album/delete/<int:id>")

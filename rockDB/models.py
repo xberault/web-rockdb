@@ -172,8 +172,8 @@ class Album(db.Model):
         return Album.query.get(id)
 
     @classmethod
-    def album_from_name(cls,name):
-        return Album.query.filter(Album.name.like(name))
+    def album_from_title(cls,title):
+        return Album.query.filter(Album.title.like(title))
 
     def get_genres(self):
         res = []
@@ -231,10 +231,19 @@ class Classification(db.Model):
         db.session.add(c)
         db.session.commit()
         return c
-    
+
+    @classmethod
+    def from_both_ids(cls, album_id, genre_id):
+        """
+        Get a Classification from its album and genre ids. Return None if the note does not exist.
+        """
+        req = Classification.query.filter(Classification.album_id==album_id,Classification.genre_id==genre_id).first()
+        return req if req else None
+
     @classmethod
     def delete(cls, album_id, genre_id):
-        db.session.delete(Classification.get(album_id, genre_id))
+        db.session.delete(Classification.from_both_ids(album_id, genre_id))
+        db.session.commit()
 
 # ***************************************************** #
 # ************** sécurité des saisies ***************** #
