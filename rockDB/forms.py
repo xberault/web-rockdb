@@ -4,10 +4,7 @@ from .models import get_sample_genre, get_all_artist
 from wtforms.validators import (DataRequired,
                                 Email,
                                 EqualTo,
-                                Length,
-                                Optional,
-                                Regexp,
-                                URL)
+                                Length)
 
 
 class SignupForm(FlaskForm):
@@ -28,14 +25,17 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Connexion')
 
+
 class Reseach(FlaskForm):
-    """  """
+    """Artist/Album Research Form."""
     gender = SelectField('Gender')
     tipe = SelectField ('By', choices=[])
     value = StringField('value')
     submit = SubmitField('Search')
 
+
 class EditAlbum(FlaskForm):
+    """Album Edit Form."""
     title = StringField("Title", validators=[DataRequired()])
     release = DateField("Released_in",format='%Y', validators=[DataRequired()])
     img = FileField("Image")
@@ -44,7 +44,8 @@ class EditAlbum(FlaskForm):
     genders = SelectMultipleField("Genders", coerce=int, choices=[], validators=[DataRequired()])
     submit = SubmitField('Sauvegarder')
 
+
 class EditArtist(FlaskForm):
+    """Artist Edit Form."""
     name = StringField("Name", validators=[DataRequired()])
-    # img = FileField("Image")
     submit = SubmitField('Sauvegarder')

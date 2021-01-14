@@ -1,5 +1,5 @@
 from .app import app
-from .forms import LoginForm, SignupForm, Reseach, EditAlbum
+from .forms import LoginForm, SignupForm, Reseach, EditAlbum, EditArtist
 from .models import User, Classification, get_sample_artist, get_sample_album, get_sample_genre, get_all_artist
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
@@ -9,7 +9,8 @@ from werkzeug.datastructures import CombinedMultiDict
 import os
 
 ITEMS_PER_PAGE = 8
-DEFAULT_IMAGE = 'album_vierge.jpeg'
+DEFAULT_IMAGE_ALBUM = 'album_vierge.jpeg'
+DEFAULT_IMAGE_ARTIST = 'album_vierge.jpeg'
 
 @app.route("/")
 def home():
@@ -112,16 +113,16 @@ def get_list_artists():
 
 def get_list_genres():
     liste = [(g.id,g.name) for g in get_sample_genre()]
-    liste.insert(0,('all','all'))
+    liste.insert(0,('-1','all'))
     return liste
 
 from .models import Artist
 
 @app.route("/artist", methods=['GET', 'POST'])
 def all_artist_default():
-    return redirect('artist/0')
+    return redirect('artist-0')
 
-@app.route("/artist/<int:page_number>", methods=['GET', 'POST'])
+@app.route("/artist-<int:page_number>", methods=['GET', 'POST'])
 def all_artist(page_number):
 
     # ******************************* #
@@ -180,7 +181,7 @@ def all_artist(page_number):
     if filter_value != None and filter_value != "":
         form.value.default = filter_value
     
-    form.tipe.choices = [('name','Name')]
+    form.tipe.choices = [('name', 'Name')]
     form.process()
 
     return render_template("artist/all_artist.html",
@@ -194,14 +195,96 @@ def all_artist(page_number):
                            filter_value = filter_value)
 
 
-@app.route("/artist/one_artist/<int:id>")
+@app.route("/artist/one_artist-<int:id>")
 def one_artist(id):
-    artist=Artist.from_id(id)
-    return render_template(
-        "artist/one_artist.html",
-        title=artist.name,
-        artist=artist
-    )
+    artist = Artist.from_id(id)
+    return render_template("artist/one_artist.html",
+                            title = artist.name,
+                            artist = artist)
+
+# @login_required
+@app.route("/artist/edit-<int:id>", methods=['GET', 'POST'])
+def edit_and_suppr_artist(id):
+    get_flashed_messages()
+    form = EditArtist(CombinedMultiDict((request.files, request.form)))
+    artist = Artist.from_id(id)
+
+    if request.method == "POST":
+
+        name = form.name.data
+        if artist.name != name:
+            existing_artist = Artist.artist_from_name(name) != []
+            if existing_artist:
+                flash("L'artiste : "+name+" existe déjà", 'warning')
+
+                form.name.default = form.name.data
+
+                return render_template("artist/add_edit_suppr_album.html",
+                                        title = artist.name,
+                                        form = form,
+                                        dest = "edit_and_suppr_artist",
+                                        id = artist.id)
+            else:
+                artist.set_name(name)
+
+        flash("Les modifications ont été validées", "success")
+        return redirect(url_for('one_artist', id=artist.id))
+
+    if request.method == 'GET':
+
+        # Préremplissage des champs
+        form.name.default = artist.name
+        form.process()
+
+        return render_template("artist/add_edit_suppr_artist.html",
+                               title = artist.name,
+                               form = form,
+                               dest = "edit_and_suppr_artist",
+                               id = artist.id)
+    flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
+    return redirect('/')
+
+# @login_required
+@app.route("/artist/add", methods=['GET', 'POST'])
+def add_artist():
+    get_flashed_messages()
+    form = EditArtist()
+
+    if request.method == "POST":
+        name = form.name.data
+        existing_artist = Artist.artist_from_name(name) != []
+        if existing_artist:
+            flash("L'artiste : "+name+" existe déjà", 'warning')
+            form.name.default = form.name.data
+
+            return render_template("artist/add_edit_suppr_artist.html",
+                                   title = "Add Artist",
+                                   form = form,
+                                   dest = "add_artist",
+                                   id = -1)
+
+        artist = Artist.create_and_add(name)
+
+        flash("L'artiste a été ajouté avec succès", "success")
+        return redirect(url_for('one_artist',id=artist.id))
+
+    if request.method == "GET":
+        return render_template("artist/add_edit_suppr_artist.html",
+                                title = "Add Artist",
+                                form = form,
+                                dest = "add_artist",
+                                id = -1)
+
+# @login_required
+@app.route("/artist/delete/<int:id>")
+def delete_artist(id):
+    get_flashed_messages()
+    if Artist.from_id(id).name == "Inconnu":
+        flash("L'artiste Inconnu ne peut pas être supprimé", "warning")
+    else:
+        Artist.delete(id)
+        flash("L'artiste a été supprimé avec succès", "success")
+    return redirect('/artist-0')
 
 
 # ***************************************************** #
@@ -210,9 +293,9 @@ def one_artist(id):
 
 @app.route("/album", methods=['GET', 'POST'])
 def all_album_default():
-    return redirect('album/0')
+    return redirect('album-0')
 
-@app.route("/album/<int:page_number>", methods=['GET', 'POST'])
+@app.route("/album-<int:page_number>", methods=['GET', 'POST'])
 def all_album(page_number):
 
     # ******************************* #
@@ -269,7 +352,7 @@ def all_album(page_number):
     if filter_value != None and filter_value != "":
         form.value.default = filter_value
 
-    form.tipe.choices = [('title','Title'),('author','Author'),('release','Released in')]
+    form.tipe.choices = [('title', 'Title'),('author', 'Author'),('release', 'Released in')]
     form.process()
 
     return render_template("album/all_album.html",
@@ -295,7 +378,7 @@ def one_album(id):
     )
 
 # @login_required
-@app.route("/album/edit/<int:id>", methods=['GET', 'POST'])
+@app.route("/album/edit-<int:id>", methods=['GET', 'POST'])
 def edit_and_suppr_album(id):
     get_flashed_messages()
     form = EditAlbum(CombinedMultiDict((request.files, request.form)))
@@ -307,7 +390,7 @@ def edit_and_suppr_album(id):
         if album.title != title:
             existing_album = Album.album_from_title(title) != []
             if existing_album:
-                flash("l'album : "+title+" existe déjà", 'warning')
+                flash("L'album : "+title+" existe déjà", 'warning')
                 flash("Attention ! Si une image a été upload il faudra la recharger", "warning")
 
                 form.title.default = form.title.data
@@ -324,7 +407,7 @@ def edit_and_suppr_album(id):
                                         title = album.title,
                                         form = form,
                                         dest = "edit_and_suppr_album",
-                                        size = len(genders),
+                                        size = len(form.genders.choices),
                                         id = album.id,
                                         img = album.img)
             else:
@@ -342,7 +425,7 @@ def edit_and_suppr_album(id):
             if artist_id != -1:
                 album.set_artist_id(artist_id)
             else:
-                flash("'ajout d'un nouvel artist depuis un album sera implémenté plus tard", 'warning')
+                flash("L'ajout d'un nouvel artist depuis un album sera implémenté plus tard", 'warning')
         
         parent_id = form.parent.data
         if album.parent_id != parent_id:
@@ -369,10 +452,10 @@ def edit_and_suppr_album(id):
             # si l'utilisateur supprime des genres 
             for gender_id in genders_album:
                 if gender_id not in genders_form:
-                    Classification.delete(album.id,gender_id)
+                    Classification.delete(album.id, gender_id)
 
         flash("Les modifications ont été validées", "success")
-        return redirect(url_for('one_album',id=album.id))
+        return redirect(url_for('one_album', id=album.id))
 
     if request.method == 'GET':
 
@@ -384,12 +467,12 @@ def edit_and_suppr_album(id):
         form.title.default = album.title
         form.parent.default = int(album.parent.id)
         form.artist.default = int(album.artist.id)
-        form.release.default = datetime.date(album.release,1,1)
+        form.release.default = datetime.date(album.release, 1, 1)
 
         if album.img != None:
             form.img.data = album.img
         else:
-            form.img.data = DEFAULT_IMAGE
+            form.img.data = DEFAULT_IMAGE_ALBUM
 
         form.genders.default = album.get_genres_id()
 
@@ -399,7 +482,7 @@ def edit_and_suppr_album(id):
                             title = album.title,
                             form = form,
                             dest = "edit_and_suppr_album",
-                            size = len(genders),
+                            size = len(form.genders.choices),
                             id = album.id,
                             img = album.img)
     flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
@@ -409,15 +492,13 @@ def edit_and_suppr_album(id):
 @app.route("/album/add", methods=['GET', 'POST'])
 def add_album():
     get_flashed_messages()
-    form = EditAlbum()
+    form = EditAlbum(CombinedMultiDict((request.files, request.form)))
 
     if request.method == "POST":
         title = form.title.data
-        print(title)
-        print(Album.album_from_title(title))
         existing_album = Album.album_from_title(title) != []
         if existing_album:
-            flash("l'album : "+title+" existe déjà", 'warning')
+            flash("L'album : "+title+" existe déjà", 'warning')
             form.title.default = form.title.data
             form.release.default = form.release.data
             form.img.default = form.img.data
@@ -443,13 +524,13 @@ def add_album():
             if img!= "":
                 image.save(os.path.join(os.path.dirname(app.instance_path), 'rockDB/static/images', secure_filename(img)))
             else:
-                img = DEFAULT_IMAGE
+                img = DEFAULT_IMAGE_ALBUM
         else:
-            img = DEFAULT_IMAGE
+            img = DEFAULT_IMAGE_ALBUM
         
         artist_id = form.artist.data
         if artist_id == -1:
-            flash("'ajout d'un nouvel artist depuis un album sera implémenté plus tard", 'warning')
+            flash("L'ajout d'un nouvel artist depuis un album sera implémenté plus tard", 'warning')
         
         parent_id = form.parent.data
         if parent_id == -1:
@@ -470,8 +551,8 @@ def add_album():
                     else:
                         flash("L'ajout d'un nouveau genre depuis un album sera implémenté plus tard", 'warning')
 
-        flash("L'album a été ajouté avec succès'", "success")
-        return redirect(url_for('one_album',id=album.id))
+        flash("L'album a été ajouté avec succès", "success")
+        return redirect(url_for('one_album', id=album.id))
 
     if request.method == "GET":
         form.artist.choices = get_list_artists()
@@ -482,15 +563,18 @@ def add_album():
                                 title = "Add Album",
                                 form = form,
                                 dest = "add_album",
-                                size = len(genders),
+                                size = len(form.genders.choices),
                                 id = -1,
                                 img = None)
 
 # @login_required
-@app.route("/album/delete/<int:id>")
+@app.route("/album/delete-<int:id>")
 def delete_album(id):
+    get_flashed_messages()
+
     Album.delete(id)
-    return redirect('/album/0')
+    flash("L'album a été supprimé avec succès", "success")
+    return redirect('/album-0')
 
 
 # ***************************************************** #

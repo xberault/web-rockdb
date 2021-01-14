@@ -11,6 +11,7 @@ class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
 
+    # ********** cration et ajout d'un artist dans la bd ********** #
     @classmethod
     def create_and_add(cls, name):
         """
@@ -23,12 +24,41 @@ class Artist(db.Model):
         db.session.commit()
         return a
 
-    def __repr__(self):
-        return f"<Artiste ({self.id}) {self.name}>"
+    # ********** modifications des attributs d'un album ********** #
+
+    def set_name(self, name):
+        self.name = name
+        db.session.commit()
+
+    @classmethod
+    def delete(cls, artist_id):
+
+        # suppression des relasions pour les genres
+        albums = set(Artist.query.get(artist_id).albums.all())
+        parents = set(Artist.query.get(artist_id).rights.all())
+
+        albums = albums|parents 
+
+        for album in albums:
+            Album.delete(album.id)
+            db.session.commit()
+
+        db.session.delete(Artist.from_id(artist_id))
+        db.session.commit()
+    
+
+    # ********** recupperation des artists ********** #
+
+    @classmethod
+    def artist_from_name(cls, name):
+        return Artist.query.filter(Artist.name.like(name)).all()
 
     @classmethod
     def from_id(cls, id):
         return Artist.query.get(id)
+    
+    def __repr__(self):
+        return f"<Artiste ({self.id}) {self.name}>"
 
 def get_all_artist():
     return Artist.query.order_by(Artist.name).all()
@@ -46,6 +76,7 @@ class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
 
+    # ********** cration et ajout d'un genre dans la bd ********** #
     @classmethod
     def create_and_add(cls, name):
         """
@@ -58,6 +89,9 @@ class Genre(db.Model):
         db.session.commit()
         return g
 
+    # ********** modifications des attributs d'un genre ********** #
+
+    # ********** recupperation des genres ********** #
     def __repr__(self):
         return f"<Genre ({self.id}) {self.name}>"
     
@@ -74,6 +108,13 @@ class Genre(db.Model):
 
 def get_sample_genre():
     return Genre.query.distinct().order_by(Genre.name)
+
+def get_genres_id():
+    genders = Genre.query.distinct().order_by(Genre.name).all()
+    res = []
+    for gender in genders:
+        res.append(gender.id)
+    return res
 
 # **************************************************************************** #
 # ************************** gestion des albums ****************************** #
@@ -159,8 +200,9 @@ class Album(db.Model):
             db.session.delete(c)
             db.session.commit()
         
-        for genre_id in genres:
-            Genre.delete_if_no_relation(genre_id)
+        # Sera décommenter quand on pourra ajouter un genre
+        # for genre_id in genres:
+        #     Genre.delete_if_no_relation(genre_id)
 
         db.session.delete(Album.from_id(album_id))
         db.session.commit()
@@ -252,13 +294,10 @@ class Classification(db.Model):
 def secure_filter_gender(filter_gender):
     try :
         filter_g = int(filter_gender)
-        genders = get_sample_genre()
-        ok = False
-        for gender in genders:
-            if gender.id == filter_g:
-                ok = True
-                filter_gender = str(filter_g)
-        if not ok:
+        genders = get_genres_id()
+        if filter_g in genders:
+            filter_gender = str(filter_g)
+        else:
             filter_gender = ""
         return filter_gender
     except:
