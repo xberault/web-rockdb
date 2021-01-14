@@ -116,9 +116,9 @@ def get_list_artists():
     return liste
 
 
-def get_list_genres():
+def get_list_genres(tuple):
     liste = [(g.id, g.name) for g in get_sample_genre()]
-    liste.insert(0, ('-1', 'all'))
+    liste.insert(0, tuple)
     return liste
 
 
@@ -174,7 +174,7 @@ def all_artist(page_number):
     form = Reseach()
 
     # envoie  de la liste des genre au formulaire)
-    form.genre.choices = get_list_genres()
+    form.genre.choices = get_list_genres(('-1', 'all'))
 
     # code pour que la nav bar garde les infos d'une page à l'autre
     try:
@@ -348,7 +348,7 @@ def all_album(page_number):
 
     form = Reseach()
 
-    form.genre.choices = get_list_genres()
+    form.genre.choices = get_list_genres(('-1', 'all'))
 
     try:
         form.genre.default = int(filter_genre)
@@ -426,7 +426,7 @@ def edit_and_suppr_album(id):
 
                 form.artist.choices = get_list_artists()
                 form.parent.choices = get_list_artists()
-                form.genres.choices = get_list_genres()
+                form.genres.choices = get_list_genres(('-1', 'new'))
 
                 return render_template("album/add_edit_suppr_album.html",
                                        title=album.title,
@@ -487,7 +487,7 @@ def edit_and_suppr_album(id):
 
         form.artist.choices = get_list_artists()
         form.parent.choices = get_list_artists()
-        form.genres.choices = get_list_genres()
+        form.genres.choices = get_list_genres(('-1', 'new'))
 
         # Préremplissage des champs
         form.title.default = album.title
@@ -534,7 +534,7 @@ def add_album():
 
             form.artist.choices = get_list_artists()
             form.parent.choices = get_list_artists()
-            form.genres.choices = get_list_genres()
+            form.genres.choices = get_list_genres(('-1', 'new'))
 
             flash("Attention ! Si une image a été upload il faudra la recharger", "warning")
             return render_template("album/add_edit_suppr_album.html",
@@ -585,7 +585,7 @@ def add_album():
     if request.method == "GET":
         form.artist.choices = get_list_artists()
         form.parent.choices = get_list_artists()
-        form.genres.choices = get_list_genres()
+        form.genres.choices = get_list_genres(('-1', 'new'))
 
         return render_template("album/add_edit_suppr_album.html",
                                title="Add Album",
