@@ -4,6 +4,9 @@ from .models import User, Classification, get_sample_artist, get_sample_album, g
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
 import datetime
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import CombinedMultiDict
+import os
 
 ITEMS_PER_PAGE = 8
 
@@ -149,7 +152,7 @@ def all_artist(page_number):
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
             artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
 
-    form=Reseach()
+    form = Reseach()
 
     # envoie  de la liste des genre au formulaire
     temp = [(g.id,g.name) for g in get_sample_genre()]
@@ -288,7 +291,7 @@ def one_album(id):
 @app.route("/album/edit/<int:id>", methods=['GET', 'POST'])
 def edit_and_suppr_album(id):
     get_flashed_messages()
-    form = EditAlbum()
+    form = EditAlbum(CombinedMultiDict((request.files, request.form)))
     album=Album.from_id(id)
 
     if request.method == "POST":
@@ -302,20 +305,23 @@ def edit_and_suppr_album(id):
             else:
                 album.set_title(title)
 
-        img = form.img.data
-        if album.img != img:
-            album.set_img(img)
+        image = request.files['img']
+        if image != None:
+            img = image.filename
+            if img!= "" and img != album.img:
+                image.save(os.path.join(os.path.dirname(app.instance_path), 'rockDB/static/images', secure_filename(img)))
+                album.set_img(img)
         
         artist_id = form.artist.data
         if album.artist_id != artist_id:
-            if artist_id != "new":
+            if artist_id != "-1":
                 album.set_artist_id(artist_id)
             else:
                 flash("'ajout d'un nouvel artist depuis un album sera implémenté plus tard", 'warning')
         
         parent_id = form.parent.data
         if album.parent_id != parent_id:
-            if parent_id != "new":
+            if parent_id != "-1":
                 album.set_parent_id(parent_id)
             else:
                 flash("L'ajout d'un nouveau parent depuis un album sera implémenté plus tard", 'warning')
@@ -333,15 +339,15 @@ def edit_and_suppr_album(id):
                 gender_id = int(gender_id)
                 if gender_id not in genders_album:
                     print("possible ajout de", gender_id)
-                    if gender_id != "new":
+                    if gender_id != "-1":
                         Classification.create_and_add(album.id, gender_id)
                     else:
                         flash("L'ajout d'un nouveau genre depuis un album sera implémenté plus tard", 'warning')
             
             # si l'utilisateur supprime des genres 
             for gender_id in genders_album:
-                temp = str(gender_id)
-                if temp not in genders_form:
+                if gender_id not in genders_form:
+                    print('suppression')
                     Classification.delete(album.id,gender_id)
 
         flash("Les modifications ont été validées", "success")
@@ -350,12 +356,12 @@ def edit_and_suppr_album(id):
     if request.method == 'GET':
 
         temp = [(art.id,art.name) for art in get_all_artist()]
-        temp.insert(0,('new','new'))
+        temp.insert(0,('-1','new'))
         form.artist.choices = temp
         form.parent.choices = temp
 
         genders = [(g.id,g.name) for g in get_sample_genre()]
-        genders.insert(0,('new','new'))
+        genders.insert(0,('-1','new'))
         form.genders.choices = genders
 
         # Préremplissage des champs
@@ -363,9 +369,17 @@ def edit_and_suppr_album(id):
         form.parent.default = int(album.parent.id)
         form.artist.default = int(album.artist.id)
         form.release.default = datetime.date(album.release,1,1)
-        form.img.default = album.img
+
+        if album.img != None:
+            form.img.data = album.img
+            form.img.default = album.img
+            form.img.value = album.img
+        else:
+            form.img.data = 'album_vierge.jpeg'
 
         form.genders.default = album.get_genres_id()
+
+        # print(form.img.data.filename)
 
         form.process()
 
@@ -374,7 +388,8 @@ def edit_and_suppr_album(id):
                             form = form,
                             dest = "edit_and_suppr_album",
                             size = len(genders),
-                            album = album)
+                            id = album.id,
+                            img = album.img)
     flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
     return redirect('/')
 
@@ -389,12 +404,12 @@ def add_album():
 
     if request.method == "GET":
         temp = [(art.id,art.name) for art in get_all_artist()]
-        temp.insert(0,('new','new'))
+        temp.insert(0,('-1','new'))
         form.artist.choices = temp
         form.parent.choices = temp
 
         genders = [(g.id,g.name) for g in get_sample_genre()]
-        genders.insert(0,('new','new'))
+        genders.insert(0,('-1','new'))
         form.genders.choices = genders
 
         return render_template("album/add_edit_suppr_album.html",
@@ -402,7 +417,8 @@ def add_album():
                                 form = form,
                                 dest = "add_album",
                                 size = len(genders),
-                                album = Album.from_id(1))
+                                id = 0,
+                                img = None)
 
 # @login_required
 @app.route("/album/delete/<int:id>")

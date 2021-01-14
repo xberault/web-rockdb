@@ -1,12 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField, SelectMultipleField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField, SelectMultipleField, FileField
 from .models import get_sample_genre, get_all_artist
 from wtforms.validators import (DataRequired,
                                 Email,
                                 EqualTo,
                                 Length,
                                 Optional,
-                                InputRequired,
+                                Regexp,
                                 URL)
 
 
@@ -36,10 +36,10 @@ class Reseach(FlaskForm):
     submit = SubmitField('Search')
 
 class EditAlbum(FlaskForm):
-    title = StringField("Title", validators=[Optional()])
-    release = DateField("Released_in",format='%Y', validators=[Optional()])
-    img = StringField("Image", validators=[Optional()])
-    parent = SelectField("Parent",choices=[], validators=[Optional()])
-    artist = SelectField("Artist",choices=[], validators=[Optional()])
-    genders = SelectMultipleField("Genders",choices=[], validators=[Optional()])
+    title = StringField("Title", validators=[DataRequired()])
+    release = DateField("Released_in",format='%Y', validators=[DataRequired()])
+    img = FileField("Image")
+    parent = SelectField("Parent", coerce=int,choices=[], validators=[DataRequired()])
+    artist = SelectField("Artist", coerce=int,choices=[], validators=[DataRequired()])
+    genders = SelectMultipleField("Genders", coerce=int, choices=[], validators=[DataRequired()])
     submit = SubmitField('Sauvegarder')

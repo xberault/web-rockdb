@@ -2,7 +2,8 @@
 {% set active_page = "edit_album" %}
 
 {% block main %}
-<form role="form" method="POST" , action="{{ url_for(dest,id=album.id) }}" class="form-signin col-md-6 col-sm-12">
+<form role="form" method="POST" enctype="multipart/form-data" , action="{{ url_for(dest,id=id) }}" class="form-signin col-md-6 col-sm-12">
+    {{ form.hidden_tag() }}
     <div class="form-group ">
         <label for="" class="col-sm-2 control-label">
             {{ form.title.label }}
@@ -16,8 +17,9 @@
         <label for="" class="col-sm-2 control-label">
             {{ form.img.label }}
         </label>
+        <img class="bd-placeholder-img card-img-top" style='height: 15vw; width: 15vw;' {% if img != None %} src="{{ url_for('static', filename='images/'+ img) }}" {% else %} src="{{ url_for('static', filename='images/album_vierge.jpeg') }}" {% endif %} alt=" Image of{{ title }}" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
         <div class="col-sm-10">
-            {{ form.img(placeholder = "URL for the image",class_="form-control", required="True") }}
+            {{ form.img(enctype="multipart/form-data") }}
         </div>
     </div>
 
@@ -26,7 +28,7 @@
             {{ form.parent.label }}
         </label>
         <div class="col-sm-10">
-            {{ form.parent(placeholder = "Parent",class_="form-control", required="True") }}
+            {{ form.parent(placeholder = "Parent", class_="form-control", required="True") }}
         </div>
     </div>
 
@@ -35,7 +37,7 @@
             {{ form.artist.label }}
         </label>
         <div class="col-sm-10">
-            {{ form.artist(placeholder = "Parent",class_="form-control", required="True") }}
+            {{ form.artist(placeholder = "Parent", class_="form-control", required="True") }}
         </div>
     </div>
 
@@ -44,7 +46,7 @@
             {{ form.release.label }}
         </label>
         <div class="col-sm-10">
-            {{ form.release(placeholder = "Release in",class_="form-control", required="True") }}
+            {{ form.release(placeholder = "Release in", class_="form-control", required="True") }}
         </div>
     </div>
 
@@ -60,7 +62,7 @@
     <div class="form-group">
         <div class="col-sm-offset col-sm-10">
             {{ form.submit(class_="btn btn-black") }}
-            <a type="submit" class="btn btn-secondary" href="{{ url_for('delete_album',id=album.id) }}">Supprimer</a>
+            <a type="submit" class="btn btn-secondary" href="{{ url_for('delete_album',id=id) }}">Supprimer</a>
         </div>
     </div>
 </form>
