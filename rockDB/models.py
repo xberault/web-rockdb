@@ -35,8 +35,8 @@ def get_all_artist():
 
 def get_sample_artist_without_gender(filter_type, filter_value):
     if filter_type == "name":
-        return Artist.query.filter(Artist.name.like('%'+filter_value+'%'))
-    return Artist.query.all()
+        return Artist.query.filter(Artist.name.like('%'+filter_value+'%')).order_by(Artist.name)
+    return Artist.query.order_by(Artist.name).all()
 
 # **************************************************************************** #
 # ************************** gestion des genres ****************************** #
@@ -173,7 +173,7 @@ class Album(db.Model):
 
     @classmethod
     def album_from_title(cls,title):
-        return Album.query.filter(Album.title.like(title))
+        return Album.query.filter(Album.title.like(title)).all()
 
     def get_genres(self):
         res = []
@@ -195,16 +195,16 @@ class Album(db.Model):
 
 def get_sample_album_without_gender(filter_type, filter_value):
     if filter_type == "title":
-        return Album.query.filter(Album.title.like('%'+filter_value+'%'))
+        return Album.query.filter(Album.title.like('%'+filter_value+'%')).order_by(Album.title)
     if filter_type == "author":
-        return Album.query.join(Artist).filter(Artist.name.like('%'+filter_value+'%'))
+        return Album.query.join(Artist).filter(Artist.name.like('%'+filter_value+'%')).order_by(Album.title)
     if filter_type == "release":
         try:
             date = int(filter_value)
-            return Album.query.filter(Album.release == date)
+            return Album.query.filter(Album.release == date).order_by(Album.title)
         except:
-            return Album.query.all()
-    return Album.query.all()
+            return Album.query.order_by(Album.title).all()
+    return Album.query.order_by(Album.title).all()
 
 # **************************************************************************** #
 # ******************* gestion relations albums genres ************************ #
