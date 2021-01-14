@@ -3,5 +3,7 @@
 
 {% block main %}
     <button class="m-2 btn btn-secondary" onclick="history.go(-1)">Retour</button>
-    {% include "album/includes/album.html" %}
+    {% with viewable=False %}
+        {% include "album/includes/album.html" %}
+    {% endwith %}
 {% endblock %}
