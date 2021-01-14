@@ -3,7 +3,31 @@
 
 {% block main %}
     <button class="m-2 btn btn-secondary" onclick="history.go(-1)">Retour</button>
-    {% with viewable=False %}
-        {% include "album/includes/album.html" %}
-    {% endwith %}
+    <h2>{{ album.title }}</h2>
+    <main class="container-fluid">
+        <section class="row">
+            <div class="col">
+                {% with viewable=False %}
+                    {% include "album/includes/album.html" %}
+                {% endwith %}
+            </div>
+        </section>
+        <section class="row">
+            <article class="col">
+                <p>
+                    Ce film a reçu une note de <b>{{ album.notations | sum(attribute='note') }}</b>
+                    sur {{ album.notations.count() }} avis
+                </p>
+                {% if note %}
+                    <p> Vous lui avez attribué une note de <b>{{ note }}</b></p>
+                {% else %}
+                    <p> Vous ne l'avez pas encore noté</p>
+                {% endif %}
+            </article>
+            <form role="form" method="POST" , action="{{ url_for('rating', id=album.id) }}"
+                  class="form-signin col-md-6 col-sm-12">
+                {{ form.hidden_tag() }}
+            </form>
+        </section>
+    </main>
 {% endblock %}

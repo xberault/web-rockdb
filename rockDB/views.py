@@ -1,6 +1,7 @@
 from .app import app
 from .forms import LoginForm, SignupForm, Reseach, EditAlbum, EditArtist, EditGenre
-from .models import User, Classification, get_sample_artist, get_sample_album, get_sample_genre, get_all_artist
+from .models import User, Classification, get_sample_artist, get_sample_album, get_sample_genre, get_all_artist, \
+    Notation
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
 import datetime
@@ -380,11 +381,25 @@ from .models import Album
 @app.route("/album/one-album-<int:id>", methods=['GET', 'POST'])
 def one_album(id):
     album = Album.from_id(id)
+    note = None
+    for notation in album.notations:
+        if notation.user_id == current_user.username:
+            note = notation.note
     return render_template(
         "album/one_album.html",
         title=album.title,
-        album=album
+        album=album,
+        note=note,
+        form=LoginForm()
     )
+
+
+@app.route("/album/one-album-<int:id>/rating", methods=["POST"])
+def rating(id=None):
+    if (id == None):
+        request.args("album.id")
+    album = Album.from_id(id)
+    pass
 
 
 # @login_required
@@ -590,16 +605,19 @@ def delete_album(id):
     flash("L'album a été supprimé avec succès", "success")
     return redirect('/album-0')
 
+
 # ***************************************************** #
 # ***********  routes pour les genres   *************** #
 # ***************************************************** #
 
 @app.route("/genre")
-def genre ():
+def genre():
     return render_template("genre/genres.html",
-                           genres = get_sample_genre())
+                           genres=get_sample_genre())
+
 
 from .models import Genre
+
 
 # @login_required
 @app.route("/genre/add", methods=['GET', 'POST'])
@@ -633,6 +651,7 @@ def add_genre():
                                dest="add_genre",
                                id=-1)
 
+
 # @login_required
 @app.route("/genre/edit-<int:id>", methods=['GET', 'POST'])
 def edit_genre(id):
@@ -645,15 +664,15 @@ def edit_genre(id):
         if genre.name != name:
             existing_genre = Genre.genre_from_name(name) != []
             if existing_genre:
-                flash("Le genre : "+name+" existe déjà", 'warning')
+                flash("Le genre : " + name + " existe déjà", 'warning')
 
                 form.name.default = form.name.data
 
                 return render_template("genre/add_genre.html",
-                                        title = genre.name,
-                                        form = form,
-                                        dest = "edit_genre",
-                                        id = genre.id)
+                                       title=genre.name,
+                                       form=form,
+                                       dest="edit_genre",
+                                       id=genre.id)
             else:
                 genre.set_name(name)
 
@@ -661,18 +680,18 @@ def edit_genre(id):
         return redirect(url_for('genre'))
 
     if request.method == 'GET':
-
         # Préremplissage des champs
         form.name.default = genre.name
         form.process()
 
         return render_template("genre/add_genre.html",
-                               title = genre.name,
-                               form = form,
-                               dest = "edit_genre",
-                               id = genre.id)
+                               title=genre.name,
+                               form=form,
+                               dest="edit_genre",
+                               id=genre.id)
     flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
     return redirect('/')
+
 
 # @login_required
 @app.route("/genre/delete-<int:id>")

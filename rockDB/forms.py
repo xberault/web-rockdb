@@ -50,6 +50,7 @@ class EditArtist(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     submit = SubmitField('Sauvegarder')
 
+
 class EditGenre(FlaskForm):
     """Artist Edit Form."""
     name = StringField("Name", validators=[DataRequired()])
