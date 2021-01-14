@@ -1,5 +1,5 @@
 from .app import app
-from .forms import LoginForm, SignupForm, Reseach, EditAlbum, EditArtist
+from .forms import LoginForm, SignupForm, Reseach, EditAlbum, EditArtist, EditGenre
 from .models import User, Classification, get_sample_artist, get_sample_album, get_sample_genre, get_all_artist
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, logout_user, current_user, login_user
@@ -137,12 +137,12 @@ def all_artist(page_number):
 
     if request.method == 'POST':
         form = Reseach()
-        filter_gender = form.gender.data
+        filter_genre = form.genre.data
         filter_type = form.tipe.data
         filter_value = form.value.data
 
     elif request.method == 'GET':
-        filter_gender = request.args.get('filter_gender')
+        filter_genre = request.args.get('filter_genre')
         filter_type = request.args.get('filter_type')
         filter_value = request.args.get('filter_value')
 
@@ -158,7 +158,7 @@ def all_artist(page_number):
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
 
-    artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
+    artists = get_sample_artist(filter_genre, filter_type, filter_value, lower_limit, upper_limit)
 
     # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
     while len(artists) <= 0:
@@ -168,16 +168,16 @@ def all_artist(page_number):
             page_number -= 1
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-            artists = get_sample_artist(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
+            artists = get_sample_artist(filter_genre, filter_type, filter_value, lower_limit, upper_limit)
 
     form = Reseach()
 
     # envoie  de la liste des genre au formulaire)
-    form.gender.choices = get_list_genres()
+    form.genre.choices = get_list_genres()
 
     # code pour que la nav bar garde les infos d'une page à l'autre
     try:
-        form.gender.default = int(filter_gender)
+        form.genre.default = int(filter_genre)
     except:
         pass
     try:
@@ -196,7 +196,7 @@ def all_artist(page_number):
                            dest="all_artist",
                            artists=artists,
                            page_number=page_number,
-                           filter_gender=filter_gender,
+                           filter_genre=filter_genre,
                            filter_type=filter_type,
                            filter_value=filter_value)
 
@@ -312,12 +312,12 @@ def all_album(page_number):
 
     if request.method == 'POST':
         form = Reseach()
-        filter_gender = form.gender.data
+        filter_genre = form.genre.data
         filter_type = form.tipe.data
         filter_value = form.value.data
 
     elif request.method == 'GET':
-        filter_gender = request.args.get('filter_gender')
+        filter_genre = request.args.get('filter_genre')
         filter_type = request.args.get('filter_type')
         filter_value = request.args.get('filter_value')
 
@@ -333,7 +333,7 @@ def all_album(page_number):
     lower_limit = page_number * ITEMS_PER_PAGE
     upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
 
-    albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
+    albums = get_sample_album(filter_genre, filter_type, filter_value, lower_limit, upper_limit)
 
     # cette boucle peut etre dangereuse si l'utilisateur malvayant rentre un nombre trop grand
     while len(albums) <= 0:
@@ -343,14 +343,14 @@ def all_album(page_number):
             page_number -= 1
             lower_limit = page_number * ITEMS_PER_PAGE
             upper_limit = page_number * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-            albums = get_sample_album(filter_gender, filter_type, filter_value, lower_limit, upper_limit)
+            albums = get_sample_album(filter_genre, filter_type, filter_value, lower_limit, upper_limit)
 
     form = Reseach()
 
-    form.gender.choices = get_list_genres()
+    form.genre.choices = get_list_genres()
 
     try:
-        form.gender.default = int(filter_gender)
+        form.genre.default = int(filter_genre)
     except:
         pass
     try:
@@ -369,7 +369,7 @@ def all_album(page_number):
                            dest="all_album",
                            albums=albums,
                            page_number=page_number,
-                           filter_gender=filter_gender,
+                           filter_genre=filter_genre,
                            filter_type=filter_type,
                            filter_value=filter_value)
 
@@ -411,13 +411,13 @@ def edit_and_suppr_album(id):
 
                 form.artist.choices = get_list_artists()
                 form.parent.choices = get_list_artists()
-                form.genders.choices = get_list_genres()
+                form.genres.choices = get_list_genres()
 
                 return render_template("album/add_edit_suppr_album.html",
                                        title=album.title,
                                        form=form,
                                        dest="edit_and_suppr_album",
-                                       size=len(form.genders.choices),
+                                       size=len(form.genres.choices),
                                        id=album.id,
                                        img=album.img)
             else:
@@ -449,21 +449,21 @@ def edit_and_suppr_album(id):
         if album.release != release:
             album.set_release(release)
 
-        genders_form = form.genders.data
-        genders_album = album.get_genres_id()
-        if genders_album != genders_form:
-            for gender_id in genders_form:
-                gender_id = int(gender_id)
-                if gender_id not in genders_album:
-                    if gender_id != -1:
-                        Classification.create_and_add(album.id, gender_id)
+        genres_form = form.genres.data
+        genres_album = album.get_genres_id()
+        if genres_album != genres_form:
+            for genre_id in genres_form:
+                genre_id = int(genre_id)
+                if genre_id not in genres_album:
+                    if genre_id != -1:
+                        Classification.create_and_add(album.id, genre_id)
                     else:
                         flash("L'ajout d'un nouveau genre depuis un album sera implémenté plus tard", 'warning')
 
             # si l'utilisateur supprime des genres 
-            for gender_id in genders_album:
-                if gender_id not in genders_form:
-                    Classification.delete(album.id, gender_id)
+            for genre_id in genres_album:
+                if genre_id not in genres_form:
+                    Classification.delete(album.id, genre_id)
 
         flash("Les modifications ont été validées", "success")
         return redirect(url_for('one_album', id=album.id))
@@ -472,7 +472,7 @@ def edit_and_suppr_album(id):
 
         form.artist.choices = get_list_artists()
         form.parent.choices = get_list_artists()
-        form.genders.choices = get_list_genres()
+        form.genres.choices = get_list_genres()
 
         # Préremplissage des champs
         form.title.default = album.title
@@ -485,7 +485,7 @@ def edit_and_suppr_album(id):
         else:
             form.img.data = DEFAULT_IMAGE_ALBUM
 
-        form.genders.default = album.get_genres_id()
+        form.genres.default = album.get_genres_id()
 
         form.process()
 
@@ -493,7 +493,7 @@ def edit_and_suppr_album(id):
                                title=album.title,
                                form=form,
                                dest="edit_and_suppr_album",
-                               size=len(form.genders.choices),
+                               size=len(form.genres.choices),
                                id=album.id,
                                img=album.img)
     flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
@@ -519,14 +519,14 @@ def add_album():
 
             form.artist.choices = get_list_artists()
             form.parent.choices = get_list_artists()
-            form.genders.choices = get_list_genres()
+            form.genres.choices = get_list_genres()
 
             flash("Attention ! Si une image a été upload il faudra la recharger", "warning")
             return render_template("album/add_edit_suppr_album.html",
                                    title="Add Album",
                                    form=form,
                                    dest="add_album",
-                                   size=len(form.genders.choices),
+                                   size=len(form.genres.choices),
                                    id=-1,
                                    img=None)
 
@@ -553,14 +553,14 @@ def add_album():
 
         album = Album.create_and_add(title, release, img, artist_id, parent_id)
 
-        genders_form = form.genders.data
-        genders_album = album.get_genres_id()
-        if genders_album != genders_form:
-            for gender_id in genders_form:
-                gender_id = int(gender_id)
-                if gender_id not in genders_album:
-                    if gender_id != -1:
-                        Classification.create_and_add(album.id, gender_id)
+        genres_form = form.genres.data
+        genres_album = album.get_genres_id()
+        if genres_album != genres_form:
+            for genre_id in genres_form:
+                genre_id = int(genre_id)
+                if genre_id not in genres_album:
+                    if genre_id != -1:
+                        Classification.create_and_add(album.id, genre_id)
                     else:
                         flash("L'ajout d'un nouveau genre depuis un album sera implémenté plus tard", 'warning')
 
@@ -570,13 +570,13 @@ def add_album():
     if request.method == "GET":
         form.artist.choices = get_list_artists()
         form.parent.choices = get_list_artists()
-        form.genders.choices = get_list_genres()
+        form.genres.choices = get_list_genres()
 
         return render_template("album/add_edit_suppr_album.html",
                                title="Add Album",
                                form=form,
                                dest="add_album",
-                               size=len(form.genders.choices),
+                               size=len(form.genres.choices),
                                id=-1,
                                img=None)
 
@@ -589,6 +589,99 @@ def delete_album(id):
     Album.delete(id)
     flash("L'album a été supprimé avec succès", "success")
     return redirect('/album-0')
+
+# ***************************************************** #
+# ***********  routes pour les genres   *************** #
+# ***************************************************** #
+
+@app.route("/genre")
+def genre ():
+    return render_template("genre/genres.html",
+                           genres = get_sample_genre())
+
+from .models import Genre
+
+# @login_required
+@app.route("/genre/add", methods=['GET', 'POST'])
+def add_genre():
+    get_flashed_messages()
+    form = EditGenre()
+
+    if request.method == "POST":
+        name = form.name.data
+        existing_genre = Genre.genre_from_name(name) != []
+        if existing_genre:
+            flash("Le genre: " + name + " existe déjà", 'warning')
+            form.name.default = form.name.data
+            print("ça passe pas")
+
+            return render_template("genre/add_genre.html",
+                                   title="Add Genre",
+                                   form=form,
+                                   dest="add_genre",
+                                   id=-1)
+
+        genre = Genre.create_and_add(name)
+
+        flash("Le genre a été ajouté avec succès", "success")
+        return redirect(url_for('genre'))
+
+    if request.method == "GET":
+        return render_template("genre/add_genre.html",
+                               title="Add Genre",
+                               form=form,
+                               dest="add_genre",
+                               id=-1)
+
+# @login_required
+@app.route("/genre/edit-<int:id>", methods=['GET', 'POST'])
+def edit_genre(id):
+    get_flashed_messages()
+    form = EditGenre()
+    genre = Genre.from_id(id)
+
+    if request.method == "POST":
+        name = form.name.data
+        if genre.name != name:
+            existing_genre = Genre.genre_from_name(name) != []
+            if existing_genre:
+                flash("Le genre : "+name+" existe déjà", 'warning')
+
+                form.name.default = form.name.data
+
+                return render_template("genre/add_genre.html",
+                                        title = genre.name,
+                                        form = form,
+                                        dest = "edit_genre",
+                                        id = genre.id)
+            else:
+                genre.set_name(name)
+
+        flash("Les modifications ont été validées", "success")
+        return redirect(url_for('genre'))
+
+    if request.method == 'GET':
+
+        # Préremplissage des champs
+        form.name.default = genre.name
+        form.process()
+
+        return render_template("genre/add_genre.html",
+                               title = genre.name,
+                               form = form,
+                               dest = "edit_genre",
+                               id = genre.id)
+    flash("Soucis dans la modifiction, retour a la page d'acceil", "warning")
+    return redirect('/')
+
+# @login_required
+@app.route("/genre/delete-<int:id>")
+def delete_genre(id):
+    get_flashed_messages()
+
+    Genre.delete(id)
+    flash("Le genre a été supprimé avec succès", "success")
+    return redirect('/genre')
 
 
 # ***************************************************** #

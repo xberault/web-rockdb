@@ -18,8 +18,8 @@
 </div>
 <div class="btn-group m-2 mb-3">
   {% if page_number > 0 %}
-  <a href="{{ url_for('all_artist',page_number = page_number-1, filter_gender=filter_gender, filter_type=filter_type, filter_value=filter_value)}}" class="btn btn-outline-secondary">Page prec</a>
+  <a href="{{ url_for('all_artist',page_number = page_number-1, filter_genre=filter_genre, filter_type=filter_type, filter_value=filter_value)}}" class="btn btn-outline-secondary">Page prec</a>
   {% endif %}
-  <a href="{{ url_for('all_artist',page_number = page_number+1, filter_gender=filter_gender, filter_type=filter_type, filter_value=filter_value)}}" class="btn btn-outline-secondary">Page suiv</a>
+  <a href="{{ url_for('all_artist',page_number = page_number+1, filter_genre=filter_genre, filter_type=filter_type, filter_value=filter_value)}}" class="btn btn-outline-secondary">Page suiv</a>
 </div>
 {% endblock %}
