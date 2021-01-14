@@ -28,7 +28,7 @@ class LoginForm(FlaskForm):
 
 class Reseach(FlaskForm):
     """Artist/Album Research Form."""
-    genre = SelectField('Genre')
+    gender = SelectField('Gender')
     tipe = SelectField ('By', choices=[])
     value = StringField('value')
     submit = SubmitField('Search')
@@ -41,7 +41,7 @@ class EditAlbum(FlaskForm):
     img = FileField("Image")
     parent = SelectField("Parent", coerce=int,choices=[], validators=[DataRequired()])
     artist = SelectField("Artist", coerce=int,choices=[], validators=[DataRequired()])
-    genres = SelectMultipleField("Genres", coerce=int, choices=[], validators=[DataRequired()])
+    genders = SelectMultipleField("Genders", coerce=int, choices=[], validators=[DataRequired()])
     submit = SubmitField('Sauvegarder')
 
 
