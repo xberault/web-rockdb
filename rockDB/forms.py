@@ -43,3 +43,8 @@ class EditAlbum(FlaskForm):
     artist = SelectField("Artist", coerce=int,choices=[], validators=[DataRequired()])
     genders = SelectMultipleField("Genders", coerce=int, choices=[], validators=[DataRequired()])
     submit = SubmitField('Sauvegarder')
+
+class EditArtist(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    # img = FileField("Image")
+    submit = SubmitField('Sauvegarder')

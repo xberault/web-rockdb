@@ -62,7 +62,9 @@
     <div class="form-group">
         <div class="col-sm-offset col-sm-10">
             {{ form.submit(class_="btn btn-black") }}
+            {% if id != -1 %}
             <a type="submit" class="btn btn-secondary" href="{{ url_for('delete_album',id=id) }}">Supprimer</a>
+            {% endif %}
         </div>
     </div>
 </form>
