@@ -1,11 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField, SelectMultipleField, FileField
 from .models import get_sample_genre, get_all_artist
 from wtforms.validators import (DataRequired,
                                 Email,
                                 EqualTo,
-                                Length,
-                                Optional)
+                                Length)
 
 
 class SignupForm(FlaskForm):
@@ -26,27 +25,27 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Connexion')
 
-class ReseachAlbum(FlaskForm):
-    """  """
+
+class Reseach(FlaskForm):
+    """Artist/Album Research Form."""
     gender = SelectField('Gender')
-    tipe = SelectField ('By', choices=[('title','Title'),('author','Author'),('release','Released in')])
+    tipe = SelectField ('By', choices=[])
     value = StringField('value')
     submit = SubmitField('Search')
 
-class ReseachArtist(FlaskForm):
-    """  """
-    gender = SelectField('Gender')
-    tipe = SelectField ('By', choices=[('name','Name')])
-    value = StringField('value')
-    submit = SubmitField('Search')
 
 class EditAlbum(FlaskForm):
-    title = StringField("title")
-    release = DateField("Released in",format='%Y')
-    img = StringField("Image")
-    parent = StringField("Parent")
+    """Album Edit Form."""
+    title = StringField("Title", validators=[DataRequired()])
+    release = DateField("Released_in",format='%Y', validators=[DataRequired()])
+    img = FileField("Image")
+    parent = SelectField("Parent", coerce=int,choices=[], validators=[DataRequired()])
+    artist = SelectField("Artist", coerce=int,choices=[], validators=[DataRequired()])
+    genders = SelectMultipleField("Genders", coerce=int, choices=[], validators=[DataRequired()])
+    submit = SubmitField('Sauvegarder')
 
-    # temp = [(g.id,g.name) for g in get_all_artist()]
-    # temp.insert(0,('new','New'))
-    artist = SelectField("artist",choices=[])
+
+class EditArtist(FlaskForm):
+    """Artist Edit Form."""
+    name = StringField("Name", validators=[DataRequired()])
     submit = SubmitField('Sauvegarder')

@@ -14,6 +14,7 @@ def loaddb(filename):
 
     # creation des artistes
     artists = {}
+    Artist.create_and_add("Inconnu")
     for al in albums:
         ar = al["by"]
         if ar not in artists:

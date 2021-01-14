@@ -11,6 +11,7 @@ class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
 
+    # ********** cration et ajout d'un artist dans la bd ********** #
     @classmethod
     def create_and_add(cls, name):
         """
@@ -23,20 +24,49 @@ class Artist(db.Model):
         db.session.commit()
         return a
 
-    def __repr__(self):
-        return f"<Artiste ({self.id}) {self.name}>"
+    # ********** modifications des attributs d'un album ********** #
+
+    def set_name(self, name):
+        self.name = name
+        db.session.commit()
+
+    @classmethod
+    def delete(cls, artist_id):
+
+        # suppression des relasions pour les genres
+        albums = set(Artist.query.get(artist_id).albums.all())
+        parents = set(Artist.query.get(artist_id).rights.all())
+
+        albums = albums|parents 
+
+        for album in albums:
+            Album.delete(album.id)
+            db.session.commit()
+
+        db.session.delete(Artist.from_id(artist_id))
+        db.session.commit()
+    
+
+    # ********** recupperation des artists ********** #
+
+    @classmethod
+    def artist_from_name(cls, name):
+        return Artist.query.filter(Artist.name.like(name)).all()
 
     @classmethod
     def from_id(cls, id):
         return Artist.query.get(id)
+    
+    def __repr__(self):
+        return f"<Artiste ({self.id}) {self.name}>"
 
 def get_all_artist():
-    return Artist.query.all()
+    return Artist.query.order_by(Artist.name).all()
 
 def get_sample_artist_without_gender(filter_type, filter_value):
     if filter_type == "name":
-        return Artist.query.filter(Artist.name.like('%'+filter_value+'%'))
-    return Artist.query.all()
+        return Artist.query.filter(Artist.name.like('%'+filter_value+'%')).order_by(Artist.name)
+    return Artist.query.order_by(Artist.name).all()
 
 # **************************************************************************** #
 # ************************** gestion des genres ****************************** #
@@ -46,6 +76,7 @@ class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
 
+    # ********** cration et ajout d'un genre dans la bd ********** #
     @classmethod
     def create_and_add(cls, name):
         """
@@ -58,6 +89,9 @@ class Genre(db.Model):
         db.session.commit()
         return g
 
+    # ********** modifications des attributs d'un genre ********** #
+
+    # ********** recupperation des genres ********** #
     def __repr__(self):
         return f"<Genre ({self.id}) {self.name}>"
     
@@ -74,6 +108,13 @@ class Genre(db.Model):
 
 def get_sample_genre():
     return Genre.query.distinct().order_by(Genre.name)
+
+def get_genres_id():
+    genders = Genre.query.distinct().order_by(Genre.name).all()
+    res = []
+    for gender in genders:
+        res.append(gender.id)
+    return res
 
 # **************************************************************************** #
 # ************************** gestion des albums ****************************** #
@@ -98,6 +139,7 @@ class Album(db.Model):
         backref=db.backref("albums", lazy="dynamic"),
         foreign_keys=[artist_id])
 
+    # ********** cration et ajout d'un album dans la bd ********** #
     @classmethod
     def create_and_add(cls, title, release, img, artist_id, parent_id):
         """
@@ -120,43 +162,91 @@ class Album(db.Model):
         db.session.commit()
         return a
 
-    def __repr__(self):
-        return f"<Album ({self.id}) {self.title}>"
+    # ********** modifications des attributs d'un album ********** #
+
+    def set_title(self, title):
+        self.title = title
+        db.session.commit()
     
-    @classmethod
-    def from_id(cls, id):
-        return Album.query.get(id)
+    def set_release(self, release):
+        self.release = release
+        db.session.commit()
+
+    def set_img(self, img):
+        self.img = img
+        db.session.commit()
+
+    def set_artist_id(self, artist_id):
+        self.artist_id = artist_id
+        db.session.commit()
+    
+    def set_parent_id(self, parent_id):
+        self.release = parent_id
+        db.session.commit()
+    
+    def set_genres(self, release):
+        pass
+
 
     @classmethod
     def delete(cls, album_id):
 
         # suppression des relasions pour les genres
         classifications = Album.query.get(album_id).classifications.all()
+        genres = set()
         for c in classifications:
             genre_id = c.genre_id
+            genres.add(genre_id)
             db.session.delete(c)
             db.session.commit()
-            Genre.delete_if_no_relation(genre_id)
+        
+        # Sera décommenter quand on pourra ajouter un genre
+        # for genre_id in genres:
+        #     Genre.delete_if_no_relation(genre_id)
 
         db.session.delete(Album.from_id(album_id))
         db.session.commit()
     
+    # ********** recupperation des albums ********** #
+    
     @classmethod
-    def edit(cls, album_id):
-        pass
+    def from_id(cls, id):
+        return Album.query.get(id)
+
+    @classmethod
+    def album_from_title(cls,title):
+        return Album.query.filter(Album.title.like(title)).all()
+
+    def get_genres(self):
+        res = []
+        classifications = Album.query.get(self.id).classifications.all()
+        for c in classifications:
+            genre = Genre.from_id(c.genre_id) 
+            res.append((genre.id,genre.name))
+        return res
+
+    def get_genres_id(self):
+        genders = Album.get_genres(self)
+        res = []
+        for g in genders:
+            res.append(g[0])
+        return res
+
+    def __repr__(self):
+        return f"<Album ({self.id}) {self.title}>"
 
 def get_sample_album_without_gender(filter_type, filter_value):
     if filter_type == "title":
-        return Album.query.filter(Album.title.like('%'+filter_value+'%'))
+        return Album.query.filter(Album.title.like('%'+filter_value+'%')).order_by(Album.title)
     if filter_type == "author":
-        return Album.query.join(Artist).filter(Artist.name.like('%'+filter_value+'%'))
+        return Album.query.join(Artist).filter(Artist.name.like('%'+filter_value+'%')).order_by(Album.title)
     if filter_type == "release":
         try:
             date = int(filter_value)
-            return Album.query.filter(Album.release == date)
+            return Album.query.filter(Album.release == date).order_by(Album.title)
         except:
-            return Album.query.all()
-    return Album.query.all()
+            return Album.query.order_by(Album.title).all()
+    return Album.query.order_by(Album.title).all()
 
 # **************************************************************************** #
 # ******************* gestion relations albums genres ************************ #
@@ -183,10 +273,19 @@ class Classification(db.Model):
         db.session.add(c)
         db.session.commit()
         return c
-    
+
+    @classmethod
+    def from_both_ids(cls, album_id, genre_id):
+        """
+        Get a Classification from its album and genre ids. Return None if the note does not exist.
+        """
+        req = Classification.query.filter(Classification.album_id==album_id,Classification.genre_id==genre_id).first()
+        return req if req else None
+
     @classmethod
     def delete(cls, album_id, genre_id):
-        db.session.delete(Classification.get(album_id, genre_id))
+        db.session.delete(Classification.from_both_ids(album_id, genre_id))
+        db.session.commit()
 
 # ***************************************************** #
 # ************** sécurité des saisies ***************** #
@@ -195,13 +294,10 @@ class Classification(db.Model):
 def secure_filter_gender(filter_gender):
     try :
         filter_g = int(filter_gender)
-        genders = get_sample_genre()
-        ok = False
-        for gender in genders:
-            if gender.id == filter_g:
-                ok = True
-                filter_gender = str(filter_g)
-        if not ok:
+        genders = get_genres_id()
+        if filter_g in genders:
+            filter_gender = str(filter_g)
+        else:
             filter_gender = ""
         return filter_gender
     except:
