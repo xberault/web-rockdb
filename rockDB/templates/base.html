@@ -4,8 +4,8 @@
     <!-- TODO à passer en paramètres ça serait sympa -->
     {% set navigation_bar = [
     ('/artist', 'all_artist', 'Artistes'),
-    ('/album', 'all_album', 'Album'),
-
+    ('/album', 'all_album', 'Albums'),
+    ('/genre', 'genre', 'Genres')
     ] -%}
     {% if current_user.is_authenticated %}
         {% set navigation_bar_logged = [
